@@ -1,0 +1,18 @@
+Package: ProSGPV
+Title: Penalized Regression with Second Generation P Values
+Version: 0.0.0.9000
+Authors@R: 
+    c(person(given = "Yi",
+           family = "Zuo",
+           role = c("aut", "cre"),
+           email = "yi.zuo@vanderbilt.edu",
+           comment = c(ORCID = "0000-0002-6643-8326")),
+      person("Jeffrey", "Blume", email = "j.blume@vanderbilt.edu", 
+      role = c("aut"))
+      )
+Description: What the package does (one paragraph).
+License: `use_gpl3_license()` 
+Encoding: UTF-8
+LazyData: true
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.1.1
