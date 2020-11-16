@@ -30,6 +30,14 @@ out.sgpv.1
     ## Selected variables are V8 V12 V13 V15 V17 V25 V26
 
 ``` r
+# get indices of variables selected
+out.sgpv.1$var.index
+
+```
+
+    ## [1]  7  9 10 12 14 22 23
+
+``` r
 # extract OLS estimates
 coef(out.sgpv.1)
 
@@ -50,8 +58,28 @@ predict(out.sgpv.1)
 out.sgpv.2 <- pro.sgpv(x = x, y = y, stage = 2)
 
 # plot the fully relaxed lasso solution path and final solution
-plot(out.sgpv.2)
+plot(out.sgpv.2,lpv=3)
 ```
+First, we plot the full solution path with point estimates and 95% confidence intervals. Note that the null region is in sky blue. The selected variables are colored blue on the y-axis.
+
+![](fig/fig.1.png)
+
+We can also zoom in to have a closer look.  
+
+``` r
+plot(out.sgpv.2,lpv=3,lambda.max=0.01)
+```
+
+![](fig/fig.2.png)
+
+Alternatively, we can plot the confidence bound that is closer to the null.
+
+``` r
+plot(out.sgpv.2,lpv=1,lambda.max=0.01)
+```
+
+![](fig/fig.3.png)
+
 
 ## Reference
 

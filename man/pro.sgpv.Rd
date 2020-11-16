@@ -39,6 +39,9 @@ out.sgpv.1 <- pro.sgpv(x = x, y = y, stage = 1)
 # check variable selection results
 out.sgpv.1
 
+# get indices of selected variable
+out.sgpv.1$var.index
+
 # extract OLS estimates
 coef(out.sgpv.1)
 

@@ -5,7 +5,7 @@
 #' @importFrom stats lm predict
 #' @param object An \code{sgpv} objectect
 #' @param newx Prediction data set
-#' @param ... Other arguments
+#' @param ... Other \code{predict} arguments
 #'
 #' @return Predicted values
 #' @export
@@ -13,12 +13,15 @@
 
 predict.sgpv <- function(object,newx,...){
 
-  lm.d <- data.frame(yy=object$y,xx = object$x[,object$var.index])
-  colnames(lm.d)[-1] <- object$var.label
-  lm.m <- lm(yy~.,data=lm.d)
+  if(length(object$var.index)>0){
+    lm.d <- data.frame(yy=object$y,xx = object$x[,object$var.index])
+    colnames(lm.d)[-1] <- object$var.label
+    lm.m <- lm(yy~.,data=lm.d)
 
-  if(missing(newx)) newx <- object$x
+    if(missing(newx)) newx <- object$x
 
-  predict(lm.m,newx)
+    predict(lm.m,newx)
+  }else stop("None of variables are selected and prediction is not available.")
+
 
 }

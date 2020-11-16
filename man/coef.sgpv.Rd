@@ -9,7 +9,7 @@
 \arguments{
 \item{object}{An \code{sgpv} object}
 
-\item{...}{Other arguments}
+\item{...}{Other \code{coef} arguments}
 }
 \value{
 Coefficients in the OLS model

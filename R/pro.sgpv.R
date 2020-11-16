@@ -31,6 +31,9 @@
 #' # check variable selection results
 #' out.sgpv.1
 #'
+#' # get indices of selected variable
+#' out.sgpv.1$var.index
+#'
 #' # extract OLS estimates
 #' coef(out.sgpv.1)
 #'
@@ -59,6 +62,8 @@ pro.sgpv <- function(x, y, stage=c(1,2)){
     x <- x[comp.index,]
     y <- y[comp.index]
   }
+
+  if(is.null(colnames(x))) colnames(x) <- paste("V",1:ncol(x),sep="")
 
   xs <- scale(x)
   ys <- scale(y)

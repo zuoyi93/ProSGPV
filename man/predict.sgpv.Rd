@@ -11,7 +11,7 @@
 
 \item{newx}{Prediction data set}
 
-\item{...}{Other arguments}
+\item{...}{Other \code{predict} arguments}
 }
 \value{
 Predicted values

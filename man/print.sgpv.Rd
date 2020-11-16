@@ -9,7 +9,7 @@
 \arguments{
 \item{x}{An \code{sgpv} object}
 
-\item{...}{Other arguments}
+\item{...}{Other \code{print} arguments}
 }
 \value{
 Variable selection results
