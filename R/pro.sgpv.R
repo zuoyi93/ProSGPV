@@ -1,10 +1,9 @@
 #' pro.sgpv function
 #'
-#' This function outputs indices of selected variables
-#' from either one-stage algorithm or two-stage algorithm and lambda.1se
-#' from the cross-validated lasso
+#' This function outputs the variable selection results
+#' from either one-stage algorithm or two-stage algorithm.
 #'
-#' @importFrom stats complete.cases coef
+#' @importFrom stats complete.cases coef lm predict
 #' @importFrom glmnet cv.glmnet
 #' @param x Independent variables, can be a \code{matrix} or a \code{data.frame}
 #' @param y Dependent variable, can be a \code{vector} or a column from a \code{data.frame}
@@ -12,8 +11,11 @@
 #'
 #' @return A list of following components:
 #' \describe{
-#' \item{out.sgpv}{A vector of indices of selected variables}
+#' \item{var.index}{A vector of indices of selected variables}
+#' \item{var.label}{A vector of labels of selected variables}
 #' \item{lambda}{Cross-validated lambda in the two-stage algorithm. \code{NULL} for the one-stage algorithm}
+#' \item{x}{Input data \code{x}}
+#' \item{y}{Input data \code{y}}
 #' }
 #' @export
 #'
@@ -22,7 +24,24 @@
 #'
 #' x = t.housing[,-ncol(t.housing)]
 #' y = t.housing$V9
+#'
+#' # one-stage algorithm
 #' out.sgpv.1 <- pro.sgpv(x = x, y = y, stage = 1)
+#'
+#' # check variable selection results
+#' out.sgpv.1
+#'
+#' # extract OLS estimates
+#' coef(out.sgpv.1)
+#'
+#' # get prediction from the model
+#' predict(out.sgpv.1)
+#'
+#' # two-stage algorithm
+#' out.sgpv.2 <- pro.sgpv(x = x, y = y, stage = 2)
+#'
+#' # plot the fully relaxed lasso solution path and final solution
+#' # plot(out.sgpv.2)
 #'
 
 
@@ -55,7 +74,14 @@ pro.sgpv <- function(x, y, stage=c(1,2)){
 
   out.sgpv <- get.var(candidate.index, xs, ys)
 
-  return(list(out.sgpv=out.sgpv,lambda=lambda))
+  out <- list(var.index=out.sgpv,
+       var.label=colnames(x)[out.sgpv],
+       lambda=lambda,
+       x=x,
+       y=y)
+
+  class(out) <- "sgpv"
+  return(out)
 
 }
 

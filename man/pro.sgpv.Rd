@@ -16,20 +16,39 @@ pro.sgpv(x, y, stage = c(1, 2))
 \value{
 A list of following components:
 \describe{
-\item{out.sgpv}{A vector of indices of selected variables}
+\item{var.index}{A vector of indices of selected variables}
+\item{var.label}{A vector of labels of selected variables}
 \item{lambda}{Cross-validated lambda in the two-stage algorithm. \code{NULL} for the one-stage algorithm}
+\item{x}{Input data \code{x}}
+\item{y}{Input data \code{y}}
 }
 }
 \description{
-This function outputs indices of selected variables
-from either one-stage algorithm or two-stage algorithm and lambda.1se
-from the cross-validated lasso
+This function outputs the variable selection results
+from either one-stage algorithm or two-stage algorithm.
 }
 \examples{
 library(ProSGPV)
 
 x = t.housing[,-ncol(t.housing)]
 y = t.housing$V9
+
+# one-stage algorithm
 out.sgpv.1 <- pro.sgpv(x = x, y = y, stage = 1)
+
+# check variable selection results
+out.sgpv.1
+
+# extract OLS estimates
+coef(out.sgpv.1)
+
+# get prediction from the model
+predict(out.sgpv.1)
+
+# two-stage algorithm
+out.sgpv.2 <- pro.sgpv(x = x, y = y, stage = 2)
+
+# plot the fully relaxed lasso solution path and final solution
+# plot(out.sgpv.2)
 
 }
