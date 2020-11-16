@@ -10,9 +10,16 @@ Authors@R:
       person("Jeffrey", "Blume", email = "j.blume@vanderbilt.edu", 
       role = c("aut"))
       )
-Description: What the package does (one paragraph).
-License: `use_gpl3_license()` 
+Maintainer: Yi Zuo <yi.zuo@vanderbilt.edu>
+Description: This package performs variable selection with Second Generation P Values. 
+    The one-stage algorithm is extremely fast and the two-stage algorithm has lower 
+    parameter estimation bias when data are highly correlated. S3 method 'predict' is 
+    available for both algorithms, and S3 method 'plot' is available for the two-stage algorithm.
+Depends: glmnet
+License: MIT + file LICENSE
 Encoding: UTF-8
+URL: https://github.com/zuoyi93/ProSGPV
+BugReports: https://github.com/zuoyi93/ProSGPV/issues
 LazyData: true
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.1
