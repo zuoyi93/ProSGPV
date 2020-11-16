@@ -11,6 +11,9 @@ devtools::install_github("zuoyi93/ProSGPV")
 
 ## Example
 
+Here, we use the Tehran housing data as an illustrative example. This data set contains 26 explanatory variables and one outcome. More details can be found at . 
+
+At the end of this section, we also provide an illustration with fewer variables that is discussed in the paper in the [reference](#ref).
 
 ``` r
 # load the package
@@ -53,6 +56,8 @@ coef(out.sgpv.1)
 predict(out.sgpv.1)
 ```
 
+S3 method `plot` is also available for the two-stage algorithm.
+
 ``` r
 # two-stage algorithm
 out.sgpv.2 <- pro.sgpv(x = x, y = y, stage = 2)
@@ -80,7 +85,10 @@ plot(out.sgpv.2,lpv=1,lambda.max=0.01)
 
 ![](fig/fig.3.png)
 
+Below is the figure with fewer variables that is shown in the paper down below. Only V3 is the true signal that generates the response. Fully relaxed lasso would have selected both V3 and V4, while our SGPV approach would only select V3.
 
-## Reference
+![](fig/fig.4.png)
+
+## Reference <a name="ref"></a>
 
 
