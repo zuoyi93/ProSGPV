@@ -4,14 +4,15 @@
 \alias{pro.sgpv}
 \title{pro.sgpv function}
 \usage{
-pro.sgpv(x, y, stage = c(1, 2))
+pro.sgpv(x, y, stage = 1)
 }
 \arguments{
 \item{x}{Independent variables, can be a \code{matrix} or a \code{data.frame}}
 
 \item{y}{Dependent variable, can be a \code{vector} or a column from a \code{data.frame}}
 
-\item{stage}{Algorithm indicator. 1 denotes the one-stage algorithm and 2 denotes the two-stage algorithm}
+\item{stage}{Algorithm indicator. 1 denotes the one-stage algorithm and
+2 denotes the two-stage algorithm. Default is 1.}
 }
 \value{
 A list of following components:

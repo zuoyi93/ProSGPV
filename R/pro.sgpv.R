@@ -7,7 +7,8 @@
 #' @importFrom glmnet cv.glmnet
 #' @param x Independent variables, can be a \code{matrix} or a \code{data.frame}
 #' @param y Dependent variable, can be a \code{vector} or a column from a \code{data.frame}
-#' @param stage Algorithm indicator. 1 denotes the one-stage algorithm and 2 denotes the two-stage algorithm
+#' @param stage Algorithm indicator. 1 denotes the one-stage algorithm and
+#' 2 denotes the two-stage algorithm. Default is 1.
 #'
 #' @return A list of following components:
 #' \describe{
@@ -22,7 +23,7 @@
 #' @examples
 #' # more examples at https://github.com/zuoyi93/ProSGPV
 
-pro.sgpv <- function(x, y, stage=c(1,2)){
+pro.sgpv <- function(x, y, stage=1){
 
   if(!(stage%in% 1:2)) stop("Stage only takes value of 1 or 2.")
 
