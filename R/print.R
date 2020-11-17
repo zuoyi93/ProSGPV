@@ -5,6 +5,8 @@
 #'
 #' @return Variable selection results
 #' @export
+#' @examples
+#' # more examples at https://github.com/zuoyi93/ProSGPV
 
 print.sgpv <- function(x,...){
   if(length(x$var.index)>0){

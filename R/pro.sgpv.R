@@ -20,33 +20,7 @@
 #' @export
 #'
 #' @examples
-#' library(ProSGPV)
-#'
-#' x = t.housing[,-ncol(t.housing)]
-#' y = t.housing$V9
-#'
-#' # one-stage algorithm
-#' out.sgpv.1 <- pro.sgpv(x = x, y = y, stage = 1)
-#'
-#' # check variable selection results
-#' out.sgpv.1
-#'
-#' # get indices of selected variable
-#' out.sgpv.1$var.index
-#'
-#' # extract OLS estimates
-#' coef(out.sgpv.1)
-#'
-#' # get prediction from the model
-#' predict(out.sgpv.1)
-#'
-#' # two-stage algorithm
-#' out.sgpv.2 <- pro.sgpv(x = x, y = y, stage = 2)
-#'
-#' # plot the fully relaxed lasso solution path and final solution
-#' # plot(out.sgpv.2)
-#'
-
+#' # more examples at https://github.com/zuoyi93/ProSGPV
 
 pro.sgpv <- function(x, y, stage=c(1,2)){
 

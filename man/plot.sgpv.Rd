@@ -4,14 +4,14 @@
 \alias{plot.sgpv}
 \title{plot S3 method}
 \usage{
-\method{plot}{sgpv}(x, lpv = c(1, 3), lambda.max = NULL, ...)
+\method{plot}{sgpv}(x, lpv = 3, lambda.max = NULL, ...)
 }
 \arguments{
 \item{x}{An \code{sgpv} object}
 
 \item{lpv}{Lines per variable. It can take the value of 1 meaning that only the
 bound that is closest to the null will be plotted, or the value of 3 meaning that
-point estimates as well as 95\% confidence interval will be plotted}
+point estimates as well as 95\% confidence interval will be plotted. Default is 3.}
 
 \item{lambda.max}{The maximum lambda on the plot. Default is \code{NULL}.}
 
@@ -20,4 +20,7 @@ point estimates as well as 95\% confidence interval will be plotted}
 \description{
 Plot the fully relaxed lasso solution path on
 the standardized scale and the final variable selection results
+}
+\examples{
+ # more examples at https://github.com/zuoyi93/ProSGPV
 }

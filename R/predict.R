@@ -9,6 +9,8 @@
 #'
 #' @return Predicted values
 #' @export
+#' @examples
+#' # more examples at https://github.com/zuoyi93/ProSGPV
 
 
 predict.sgpv <- function(object,newx,...){

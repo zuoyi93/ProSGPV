@@ -19,3 +19,6 @@ Predicted values
 \description{
 Prediction using the fitted model
 }
+\examples{
+# more examples at https://github.com/zuoyi93/ProSGPV
+}

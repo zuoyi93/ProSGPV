@@ -17,3 +17,6 @@ Variable selection results
 \description{
 print S3 method
 }
+\examples{
+# more examples at https://github.com/zuoyi93/ProSGPV
+}

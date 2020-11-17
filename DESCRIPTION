@@ -8,6 +8,8 @@ Authors@R:
            email = "yi.zuo@vanderbilt.edu",
            comment = c(ORCID = "0000-0002-6643-8326")),
       person("Jeffrey", "Blume", email = "j.blume@vanderbilt.edu", 
+      role = c("aut")),
+      person("Thomas", "Stewart", email = "thomas.stewart@vanderbilt.edu", 
       role = c("aut"))
       )
 Maintainer: Yi Zuo <yi.zuo@vanderbilt.edu>

@@ -1,23 +1,23 @@
-#' coef S3 method
+#' summary S3 method
 #'
-#' Extract coefficients from the model fit
+#' Provide summary of the OLS model on the selected variables
 #'
-#' @importFrom stats coef lm
 #' @param object An \code{sgpv} object
-#' @param ... Other \code{coef} arguments
+#' @param ... Other arguments
 #'
-#' @return Coefficients in the OLS model
+#' @return Summary of an OLS model
 #' @export
 #'
 #' @examples
 #' # more examples at https://github.com/zuoyi93/ProSGPV
-
-coef.sgpv <- function(object,...){
+#'
+summary.sgpv <- function(object,...){
 
   if(length(object$var.index)>0){
     lm.d <- data.frame(yy=object$y,xx = object$x[,object$var.index])
+    colnames(lm.d)[1] <- "Response"
     colnames(lm.d)[-1] <- object$var.label
-    coef(lm(yy~.,data=lm.d))
+    summary(lm(Response~.,data=lm.d))
   }else stop("None of variables are selected.")
 
 }

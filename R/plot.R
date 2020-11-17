@@ -7,15 +7,16 @@
 #' @param x An \code{sgpv} object
 #' @param lpv Lines per variable. It can take the value of 1 meaning that only the
 #' bound that is closest to the null will be plotted, or the value of 3 meaning that
-#' point estimates as well as 95% confidence interval will be plotted
+#' point estimates as well as 95% confidence interval will be plotted. Default is 3.
 #' @param lambda.max The maximum lambda on the plot. Default is \code{NULL}.
 #' @param ... Other \code{plot} arguments
 #'
 #' @return NULL
 #' @export
-#'
+#' @examples
+#'  # more examples at https://github.com/zuoyi93/ProSGPV
 
-plot.sgpv <- function(x,lpv=c(1,3),lambda.max=NULL,...){
+plot.sgpv <- function(x,lpv=3,lambda.max=NULL,...){
 
   if(is.null(x$lambda)) stop("One-stage algorithm doesn't have the plot function.")
   if(! lpv %in% c(1,3)) stop("lpv argument only takes values of 1 and 3.")
@@ -63,10 +64,14 @@ plot.sgpv <- function(x,lpv=c(1,3),lambda.max=NULL,...){
 
   # get the indices of selected variables
   selected.index <- x$var.index
+  black.index <- setdiff(1:p,selected.index)
 
   # change the color of the variables
-  color.use <- rep("black",p)
-  color.use[selected.index] <- "blue"
+  color.use <- c(rep("black",length(black.index)),
+                 rep("blue",length(selected.index)))
+
+  location.beta <- location.beta[c(black.index,selected.index)]
+  var.axis <- x.names[c(black.index,selected.index)]
 
   # find the limit of the canvas
   if(lpv==3){
@@ -104,12 +109,13 @@ plot.sgpv <- function(x,lpv=c(1,3),lambda.max=NULL,...){
          axes=F,frame.plot=T)
     axis(1,at=round(seq(0,lambda.max,length.out=5),3) )
     axis(2,at=ytick,labels=c(ytick[1:2],0,ytick[4:5]))
-    abline(h=0)
-    polygon(c(lambda.seq,rev(lambda.seq)),c(-n.bound,rev(n.bound)),col="grey",border="grey")
-    abline(v=vlambda,lty=2)
-    mtext(x.names,side=2,at=location.beta,col=color.use)
+    mtext(var.axis,side=2,at=location.beta,col=color.use)
     mtext(bquote(lambda["1se"]),side=1,at=vlambda)
+    polygon(c(lambda.seq,rev(lambda.seq)),c(-n.bound,rev(n.bound)),col="grey",border="grey")
     invisible(mapply(lines,xvals,yvals,col=1:p))
+    abline(h=0)
+    abline(v=vlambda,lty=2)
+
 
   }else if (lpv==3){
 
@@ -119,10 +125,12 @@ plot.sgpv <- function(x,lpv=c(1,3),lambda.max=NULL,...){
          axes=F,frame.plot=T)
     axis(1,at=round(seq(0,lambda.max,length.out=5),3) )
     axis(2,at=ytick,labels=c(ytick[1:2],0,ytick[4:5]))
-    abline(h=0)
+
+    # null region
     polygon(c(lambda.seq,rev(lambda.seq)),c(-n.bound,rev(n.bound)),col="grey",border="grey")
-    abline(v=vlambda,lty=2)
-    mtext(x.names,side=2,at=location.beta,col=color.use)
+
+    # text on axis
+    mtext(var.axis,side=2,at=location.beta,col=color.use)
     mtext(bquote(lambda["1se"]),side=1,at=vlambda)
 
     # point estimates
@@ -139,6 +147,9 @@ plot.sgpv <- function(x,lpv=c(1,3),lambda.max=NULL,...){
     xvals <- split(plot.d$lambda,plot.d$v)
     yvals <- split(plot.d$lb,plot.d$v)
     invisible(mapply(lines,xvals,yvals,col=1:p,lty=2))
+
+    abline(h=0)
+    abline(v=vlambda,lty=2)
 
   }
 

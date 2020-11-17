@@ -17,3 +17,6 @@ Coefficients in the OLS model
 \description{
 Extract coefficients from the model fit
 }
+\examples{
+# more examples at https://github.com/zuoyi93/ProSGPV
+}
