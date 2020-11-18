@@ -5,7 +5,6 @@
 #'
 #' @importFrom stats complete.cases coef lm predict
 #' @importFrom glmnet cv.glmnet
-#' @importFrom graphics abline axis lines mtext polygon
 #' @param x Independent variables, can be a \code{matrix} or a \code{data.frame}
 #' @param y Dependent variable, can be a 'vector' or a column from a \code{data.frame}
 #' @param stage Algorithm indicator. 1 denotes the one-stage algorithm and
@@ -66,8 +65,14 @@ pro.sgpv <- function(x, y, stage=1){
 
 }
 
-
+#' print S3 method
+#'
+#' @param x An \code{sgpv} object
+#' @param ... Other \code{print} arguments
+#'
+#' @return Variable selection results
 #' @export
+
 print.sgpv <- function(x,...){
   if(length(x$var.index)>0){
     cat("Selected variables are", x$var.label)
@@ -75,8 +80,17 @@ print.sgpv <- function(x,...){
 
 }
 
-
+#' coef S3 method
+#'
+#' Extract coefficients from the model fit
+#'
+#' @importFrom stats coef lm
+#' @param object An \code{sgpv} object
+#' @param ... Other \code{coef} arguments
+#'
+#' @return Coefficients in the OLS model
 #' @export
+
 coef.sgpv <- function(object,...){
 
   if(length(object$var.index)>0){
@@ -87,7 +101,16 @@ coef.sgpv <- function(object,...){
 
 }
 
+#' summary S3 method
+#'
+#' Provide summary of the OLS model on the selected variables
+#'
+#' @param object An \code{sgpv} object
+#' @param ... Other arguments
+#'
+#' @return Summary of an OLS model
 #' @export
+
 summary.sgpv <- function(object,...){
 
   if(length(object$var.index)>0){
@@ -99,7 +122,18 @@ summary.sgpv <- function(object,...){
 
 }
 
+#' predict S3 method
+#'
+#' Prediction using the fitted model
+#'
+#' @importFrom stats lm predict
+#' @param object An \code{sgpv} objectect
+#' @param newx Prediction data set
+#' @param ... Other \code{predict} arguments
+#'
+#' @return Predicted values
 #' @export
+
 predict.sgpv <- function(object,newx,...){
 
   if(length(object$var.index)>0){
@@ -114,7 +148,22 @@ predict.sgpv <- function(object,newx,...){
 
 }
 
+#' plot S3 method
+#'
+#' Plot the fully relaxed lasso solution path on
+#' the standardized scale and the final variable selection results
+#'
+#' @importFrom graphics abline axis lines mtext polygon
+#' @param x An \code{sgpv} object
+#' @param lpv Lines per variable. It can take the value of 1 meaning that only the
+#' bound that is closest to the null will be plotted, or the value of 3 meaning that
+#' point estimates as well as 95% confidence interval will be plotted. Default is 3.
+#' @param lambda.max The maximum lambda on the plot. Default is \code{NULL}.
+#' @param ... Other \code{plot} arguments
+#'
+#' @return NULL
 #' @export
+
 plot.sgpv <- function(x,lpv=3,lambda.max=NULL,...){
 
   if(is.null(x$lambda)) stop("One-stage algorithm doesn't have the plot function.")
