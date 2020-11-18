@@ -7,9 +7,9 @@ Authors@R:
            role = c("aut", "cre"),
            email = "yi.zuo@vanderbilt.edu",
            comment = c(ORCID = "0000-0002-6643-8326")),
-      person("Jeffrey", "Blume", email = "j.blume@vanderbilt.edu", 
-      role = c("aut")),
       person("Thomas", "Stewart", email = "thomas.stewart@vanderbilt.edu", 
+      role = c("aut")),
+      person("Jeffrey", "Blume", email = "j.blume@vanderbilt.edu", 
       role = c("aut"))
       )
 Maintainer: Yi Zuo <yi.zuo@vanderbilt.edu>
@@ -17,7 +17,7 @@ Description: This package performs variable selection with Second Generation P V
     The one-stage algorithm is extremely fast and the two-stage algorithm has lower 
     parameter estimation bias when data are highly correlated. S3 method 'predict' is 
     available for both algorithms, and S3 method 'plot' is available for the two-stage algorithm.
-Depends: glmnet
+Depends: R (>= 3.5.0), glmnet
 License: MIT + file LICENSE
 Encoding: UTF-8
 URL: https://github.com/zuoyi93/ProSGPV

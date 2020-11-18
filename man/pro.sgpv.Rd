@@ -9,7 +9,7 @@ pro.sgpv(x, y, stage = 1)
 \arguments{
 \item{x}{Independent variables, can be a \code{matrix} or a \code{data.frame}}
 
-\item{y}{Dependent variable, can be a \code{vector} or a column from a \code{data.frame}}
+\item{y}{Dependent variable, can be a 'vector' or a column from a \code{data.frame}}
 
 \item{stage}{Algorithm indicator. 1 denotes the one-stage algorithm and
 2 denotes the two-stage algorithm. Default is 1.}
@@ -29,5 +29,5 @@ This function outputs the variable selection results
 from either one-stage algorithm or two-stage algorithm.
 }
 \examples{
-# more examples at https://github.com/zuoyi93/ProSGPV
+# Examples at https://github.com/zuoyi93/ProSGPV
 }
