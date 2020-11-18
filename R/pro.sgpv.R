@@ -6,7 +6,7 @@
 #' @importFrom stats complete.cases coef lm predict
 #' @importFrom glmnet cv.glmnet
 #' @param x Independent variables, can be a \code{matrix} or a \code{data.frame}
-#' @param y Dependent variable, can be a 'vector' or a column from a \code{data.frame}
+#' @param y Dependent variable, can be a \code{vector} or a column from a \code{data.frame}
 #' @param stage Algorithm indicator. 1 denotes the one-stage algorithm and
 #' 2 denotes the two-stage algorithm. Default is 1.
 #'
@@ -19,9 +19,25 @@
 #' \item{y}{Input data \code{y}}
 #' }
 #' @export
-#'
+#' @seealso
+#' * [print.sgpv()] prints the variable selection results
+#' * [coef.sgpv()] extracts coefficient estimates
+#' * [summary.sgpv()] summarizes the OLS outputs
+#' * [predict.sgpv()] predicts the outcome
+#' * [plot.sgpv()] plots variable selection results
 #' @examples
-#' # Examples at https://github.com/zuoyi93/ProSGPV
+#'
+#' # load the package
+#' library(ProSGPV)
+#'
+#' # prepare the data
+#' x = t.housing[,-ncol(t.housing)]
+#' y = t.housing$V9
+#'
+#' # run one-stage algorithm
+#' out.sgpv.1 <- pro.sgpv(x = x, y = y, stage = 1)
+#'
+#' # More examples at https://github.com/zuoyi93/ProSGPV
 
 pro.sgpv <- function(x, y, stage=1){
 
@@ -65,13 +81,28 @@ pro.sgpv <- function(x, y, stage=1){
 
 }
 
-#' print S3 method
+#' Print variable selection results
+#'
+#' \code{print} method for an S3 object of class \code{sgpv}
 #'
 #' @param x An \code{sgpv} object
 #' @param ... Other \code{print} arguments
 #'
 #' @return Variable selection results
 #' @export
+#' @examples
+#'
+#' # load the package
+#' library(ProSGPV)
+#'
+#' # prepare the data
+#' x = t.housing[,-ncol(t.housing)]
+#' y = t.housing$V9
+#'
+#' # run one-stage algorithm
+#' out.sgpv.1 <- pro.sgpv(x = x, y = y, stage = 1)
+#'
+#' out.sgpv.1
 
 print.sgpv <- function(x,...){
   if(length(x$var.index)>0){
@@ -80,9 +111,9 @@ print.sgpv <- function(x,...){
 
 }
 
-#' coef S3 method
-#'
 #' Extract coefficients from the model fit
+#'
+#' \code{coef} method for an S3 object of class \code{sgpv}
 #'
 #' @importFrom stats coef lm
 #' @param object An \code{sgpv} object
@@ -90,6 +121,20 @@ print.sgpv <- function(x,...){
 #'
 #' @return Coefficients in the OLS model
 #' @export
+#' @examples
+#'
+#' # load the package
+#' library(ProSGPV)
+#'
+#' # prepare the data
+#' x = t.housing[,-ncol(t.housing)]
+#' y = t.housing$V9
+#'
+#' # run one-stage algorithm
+#' out.sgpv.1 <- pro.sgpv(x = x, y = y, stage = 1)
+#'
+#' # get coefficients
+#' coef(out.sgpv.1)
 
 coef.sgpv <- function(object,...){
 
@@ -101,15 +146,29 @@ coef.sgpv <- function(object,...){
 
 }
 
-#' summary S3 method
+#' Summary of the OLS model on selected variables
 #'
-#' Provide summary of the OLS model on the selected variables
+#' \code{summary} method for an S3 object of class \code{sgpv}
 #'
 #' @param object An \code{sgpv} object
 #' @param ... Other arguments
 #'
 #' @return Summary of an OLS model
 #' @export
+#' @examples
+#'
+#' # load the package
+#' library(ProSGPV)
+#'
+#' # prepare the data
+#' x = t.housing[,-ncol(t.housing)]
+#' y = t.housing$V9
+#'
+#' # run one-stage algorithm
+#' out.sgpv.1 <- pro.sgpv(x = x, y = y, stage = 1)
+#'
+#' # get regression summary
+#' summary(out.sgpv.1)
 
 summary.sgpv <- function(object,...){
 
@@ -122,9 +181,9 @@ summary.sgpv <- function(object,...){
 
 }
 
-#' predict S3 method
-#'
 #' Prediction using the fitted model
+#'
+#' \code{predict} method for an S3 object of class \code{sgpv}
 #'
 #' @importFrom stats lm predict
 #' @param object An \code{sgpv} objectect
@@ -133,6 +192,19 @@ summary.sgpv <- function(object,...){
 #'
 #' @return Predicted values
 #' @export
+#' @examples
+#'
+#' # load the package
+#' library(ProSGPV)
+#'
+#' # prepare the data
+#' x = t.housing[,-ncol(t.housing)]
+#' y = t.housing$V9
+#'
+#' # run one-stage algorithm
+#' out.sgpv.1 <- pro.sgpv(x = x, y = y, stage = 1)
+#'
+#' predict(out.sgpv.1)
 
 predict.sgpv <- function(object,newx,...){
 
@@ -148,9 +220,10 @@ predict.sgpv <- function(object,newx,...){
 
 }
 
-#' plot S3 method
+#' Plot variable selection results
 #'
-#' Plot the fully relaxed lasso solution path on
+#' \code{plot} method for an S3 object of class \code{sgpv}. This function plots
+#' the fully relaxed lasso solution path on
 #' the standardized scale and the final variable selection results
 #'
 #' @importFrom graphics abline axis lines mtext polygon
@@ -163,6 +236,26 @@ predict.sgpv <- function(object,newx,...){
 #'
 #' @return NULL
 #' @export
+#' @examples
+#'
+#' # load the package
+#' library(ProSGPV)
+#'
+#' # prepare the data
+#' x = t.housing[,-ncol(t.housing)]
+#' y = t.housing$V9
+#'
+#' # two-stage algorithm
+#' out.sgpv.2 <- pro.sgpv(x = x, y = y, stage = 2)
+#'
+#' # plot the fully relaxed lasso solution path and final solution
+#' plot(out.sgpv.2)
+#'
+#' # zoom in a little bit
+#' plot(out.sgpv.2,lambda.max=0.01)
+#'
+#' # only plot one confidence bound
+#' plot(out.sgpv.2,lpv=1,lambda.max=0.01)
 
 plot.sgpv <- function(x,lpv=3,lambda.max=NULL,...){
 

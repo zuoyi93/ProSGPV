@@ -45,6 +45,10 @@ out.sgpv.1$var.index
 
 Now let's view the summary of the OLS model on those selected variables. 
 
+``` r
+summary(out.sgpv.1)
+```
+
 	## Call:
 	## lm(formula = Response ~ ., data = lm.d)
 	##

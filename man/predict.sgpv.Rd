@@ -2,7 +2,7 @@
 % Please edit documentation in R/pro.sgpv.R
 \name{predict.sgpv}
 \alias{predict.sgpv}
-\title{predict S3 method}
+\title{Prediction using the fitted model}
 \usage{
 \method{predict}{sgpv}(object, newx, ...)
 }
@@ -17,5 +17,19 @@
 Predicted values
 }
 \description{
-Prediction using the fitted model
+\code{predict} method for an S3 object of class \code{sgpv}
+}
+\examples{
+
+# load the package
+library(ProSGPV)
+
+# prepare the data
+x = t.housing[,-ncol(t.housing)]
+y = t.housing$V9
+
+# run one-stage algorithm
+out.sgpv.1 <- pro.sgpv(x = x, y = y, stage = 1)
+
+predict(out.sgpv.1)
 }

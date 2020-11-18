@@ -9,7 +9,7 @@ pro.sgpv(x, y, stage = 1)
 \arguments{
 \item{x}{Independent variables, can be a \code{matrix} or a \code{data.frame}}
 
-\item{y}{Dependent variable, can be a 'vector' or a column from a \code{data.frame}}
+\item{y}{Dependent variable, can be a \code{vector} or a column from a \code{data.frame}}
 
 \item{stage}{Algorithm indicator. 1 denotes the one-stage algorithm and
 2 denotes the two-stage algorithm. Default is 1.}
@@ -29,5 +29,25 @@ This function outputs the variable selection results
 from either one-stage algorithm or two-stage algorithm.
 }
 \examples{
-# Examples at https://github.com/zuoyi93/ProSGPV
+
+# load the package
+library(ProSGPV)
+
+# prepare the data
+x = t.housing[,-ncol(t.housing)]
+y = t.housing$V9
+
+# run one-stage algorithm
+out.sgpv.1 <- pro.sgpv(x = x, y = y, stage = 1)
+
+# More examples at https://github.com/zuoyi93/ProSGPV
+}
+\seealso{
+\itemize{
+\item \code{\link[=print.sgpv]{print.sgpv()}} prints the variable selection results
+\item \code{\link[=coef.sgpv]{coef.sgpv()}} extracts coefficient estimates
+\item \code{\link[=summary.sgpv]{summary.sgpv()}} summarizes the OLS outputs
+\item \code{\link[=predict.sgpv]{predict.sgpv()}} predicts the outcome
+\item \code{\link[=plot.sgpv]{plot.sgpv()}} plots variable selection results
+}
 }

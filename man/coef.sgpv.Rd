@@ -2,7 +2,7 @@
 % Please edit documentation in R/pro.sgpv.R
 \name{coef.sgpv}
 \alias{coef.sgpv}
-\title{coef S3 method}
+\title{Extract coefficients from the model fit}
 \usage{
 \method{coef}{sgpv}(object, ...)
 }
@@ -15,5 +15,20 @@
 Coefficients in the OLS model
 }
 \description{
-Extract coefficients from the model fit
+\code{coef} method for an S3 object of class \code{sgpv}
+}
+\examples{
+
+# load the package
+library(ProSGPV)
+
+# prepare the data
+x = t.housing[,-ncol(t.housing)]
+y = t.housing$V9
+
+# run one-stage algorithm
+out.sgpv.1 <- pro.sgpv(x = x, y = y, stage = 1)
+
+# get coefficients
+coef(out.sgpv.1)
 }

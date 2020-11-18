@@ -2,7 +2,7 @@
 % Please edit documentation in R/pro.sgpv.R
 \name{summary.sgpv}
 \alias{summary.sgpv}
-\title{summary S3 method}
+\title{Summary of the OLS model on selected variables}
 \usage{
 \method{summary}{sgpv}(object, ...)
 }
@@ -15,5 +15,20 @@
 Summary of an OLS model
 }
 \description{
-Provide summary of the OLS model on the selected variables
+\code{summary} method for an S3 object of class \code{sgpv}
+}
+\examples{
+
+# load the package
+library(ProSGPV)
+
+# prepare the data
+x = t.housing[,-ncol(t.housing)]
+y = t.housing$V9
+
+# run one-stage algorithm
+out.sgpv.1 <- pro.sgpv(x = x, y = y, stage = 1)
+
+# get regression summary
+summary(out.sgpv.1)
 }

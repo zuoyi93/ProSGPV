@@ -2,7 +2,7 @@
 % Please edit documentation in R/pro.sgpv.R
 \name{print.sgpv}
 \alias{print.sgpv}
-\title{print S3 method}
+\title{Print variable selection results}
 \usage{
 \method{print}{sgpv}(x, ...)
 }
@@ -15,5 +15,19 @@
 Variable selection results
 }
 \description{
-print S3 method
+\code{print} method for an S3 object of class \code{sgpv}
+}
+\examples{
+
+# load the package
+library(ProSGPV)
+
+# prepare the data
+x = t.housing[,-ncol(t.housing)]
+y = t.housing$V9
+
+# run one-stage algorithm
+out.sgpv.1 <- pro.sgpv(x = x, y = y, stage = 1)
+
+out.sgpv.1
 }

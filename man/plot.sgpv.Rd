@@ -2,7 +2,7 @@
 % Please edit documentation in R/pro.sgpv.R
 \name{plot.sgpv}
 \alias{plot.sgpv}
-\title{plot S3 method}
+\title{Plot variable selection results}
 \usage{
 \method{plot}{sgpv}(x, lpv = 3, lambda.max = NULL, ...)
 }
@@ -18,6 +18,28 @@ point estimates as well as 95\% confidence interval will be plotted. Default is 
 \item{...}{Other \code{plot} arguments}
 }
 \description{
-Plot the fully relaxed lasso solution path on
+\code{plot} method for an S3 object of class \code{sgpv}. This function plots
+the fully relaxed lasso solution path on
 the standardized scale and the final variable selection results
+}
+\examples{
+
+# load the package
+library(ProSGPV)
+
+# prepare the data
+x = t.housing[,-ncol(t.housing)]
+y = t.housing$V9
+
+# two-stage algorithm
+out.sgpv.2 <- pro.sgpv(x = x, y = y, stage = 2)
+
+# plot the fully relaxed lasso solution path and final solution
+plot(out.sgpv.2)
+
+# zoom in a little bit
+plot(out.sgpv.2,lambda.max=0.01)
+
+# only plot one confidence bound
+plot(out.sgpv.2,lpv=1,lambda.max=0.01)
 }
