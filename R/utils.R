@@ -35,7 +35,7 @@ get.var <- function(candidate.index,xs,ys){
 #'
 #' Get the coefficients and confidence intervals from regression at each \code{lambda}
 #' as well as the null bound in SGPVs
-#'
+#' @importFrom glmnet glmnet
 #' @param xs Standardized design matrix
 #' @param ys Standardized outcome
 #' @param lambda \code{lambda} in the lasso
@@ -47,7 +47,7 @@ get.coef <- function(xs,ys,lambda){
   p <- ncol(xs)
 
   # evaluate lasso at lambda
-  lasso <- cv.glmnet(xs,ys)
+  lasso <- glmnet(xs,ys)
   index <- which(coef(lasso,s=lambda)[-1] != 0)
 
   # define the output
