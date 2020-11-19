@@ -15,7 +15,7 @@
 Coefficients in the OLS model
 }
 \description{
-\code{coef} method for an S3 object of class \code{sgpv}
+S3 method \code{coef} for an S3 object of class \code{sgpv}
 }
 \examples{
 

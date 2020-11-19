@@ -15,7 +15,7 @@
 Summary of an OLS model
 }
 \description{
-\code{summary} method for an S3 object of class \code{sgpv}
+S3 method \code{summary} for an S3 object of class \code{sgpv}
 }
 \examples{
 

@@ -8,7 +8,6 @@
 #' @param ys Standardized dependent variable
 #'
 #' @return Indices of variables selected
-#' @export
 
 get.var <- function(candidate.index,xs,ys){
 
@@ -42,8 +41,6 @@ get.var <- function(candidate.index,xs,ys){
 #' @param lambda \code{lambda} in the lasso
 #'
 #' @return A vector that contains the point estimates, confidence intervals and the null bound
-#' @export
-#'
 
 get.coef <- function(xs,ys,lambda){
 

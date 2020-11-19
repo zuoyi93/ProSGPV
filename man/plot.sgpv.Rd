@@ -18,7 +18,7 @@ point estimates as well as 95\% confidence interval will be plotted. Default is 
 \item{...}{Other \code{plot} arguments}
 }
 \description{
-\code{plot} method for an S3 object of class \code{sgpv}. This function plots
+S3 method \code{plot} for an object of class \code{sgpv}. This function plots
 the fully relaxed lasso solution path on
 the standardized scale and the final variable selection results
 }

@@ -83,7 +83,7 @@ pro.sgpv <- function(x, y, stage=1){
 
 #' Print variable selection results
 #'
-#' \code{print} method for an S3 object of class \code{sgpv}
+#' S3 method \code{print} for an S3 object of class \code{sgpv}
 #'
 #' @param x An \code{sgpv} object
 #' @param ... Other \code{print} arguments
@@ -113,7 +113,7 @@ print.sgpv <- function(x,...){
 
 #' Extract coefficients from the model fit
 #'
-#' \code{coef} method for an S3 object of class \code{sgpv}
+#' S3 method \code{coef} for an S3 object of class \code{sgpv}
 #'
 #' @importFrom stats coef lm
 #' @param object An \code{sgpv} object
@@ -148,7 +148,7 @@ coef.sgpv <- function(object,...){
 
 #' Summary of the OLS model on selected variables
 #'
-#' \code{summary} method for an S3 object of class \code{sgpv}
+#' S3 method \code{summary} for an S3 object of class \code{sgpv}
 #'
 #' @param object An \code{sgpv} object
 #' @param ... Other arguments
@@ -183,7 +183,7 @@ summary.sgpv <- function(object,...){
 
 #' Prediction using the fitted model
 #'
-#' \code{predict} method for an S3 object of class \code{sgpv}
+#' S3 method \code{predict} for an object of class \code{sgpv}
 #'
 #' @importFrom stats lm predict
 #' @param object An \code{sgpv} objectect
@@ -222,7 +222,7 @@ predict.sgpv <- function(object,newx,...){
 
 #' Plot variable selection results
 #'
-#' \code{plot} method for an S3 object of class \code{sgpv}. This function plots
+#' S3 method \code{plot} for an object of class \code{sgpv}. This function plots
 #' the fully relaxed lasso solution path on
 #' the standardized scale and the final variable selection results
 #'

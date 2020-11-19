@@ -15,7 +15,7 @@
 Variable selection results
 }
 \description{
-\code{print} method for an S3 object of class \code{sgpv}
+S3 method \code{print} for an S3 object of class \code{sgpv}
 }
 \examples{
 

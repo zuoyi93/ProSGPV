@@ -17,7 +17,7 @@
 Predicted values
 }
 \description{
-\code{predict} method for an S3 object of class \code{sgpv}
+S3 method \code{predict} for an object of class \code{sgpv}
 }
 \examples{
 
