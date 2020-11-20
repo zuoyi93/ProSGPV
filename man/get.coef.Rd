@@ -4,7 +4,7 @@
 \alias{get.coef}
 \title{Get coefficients at each \code{lambda}}
 \usage{
-get.coef(xs, ys, lambda)
+get.coef(xs, ys, lambda, lasso)
 }
 \arguments{
 \item{xs}{Standardized design matrix}
@@ -12,6 +12,8 @@ get.coef(xs, ys, lambda)
 \item{ys}{Standardized outcome}
 
 \item{lambda}{\code{lambda} in the lasso}
+
+\item{lasso}{An \code{glmnet} object}
 }
 \value{
 A vector that contains the point estimates, confidence intervals and the null bound

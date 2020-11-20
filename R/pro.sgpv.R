@@ -278,8 +278,11 @@ plot.sgpv <- function(x,lpv=3,lambda.max=NULL,...){
   # get a sequence of lambda
   lambda.seq <- seq(0,lambda.max,step)
 
+  # fit lasso once
+  lasso <- glmnet(xs,ys)
+
   # get coefficient estimates at each lambda
-  results <- sapply(lambda.seq,function(z) get.coef(xs=xs,ys=ys,lambda=z))
+  results <- sapply(lambda.seq,function(z) get.coef(xs=xs,ys=ys,lambda=z,lasso=lasso))
 
   # prepare data to plot
   to.plot <- data.frame(lambda=rep(lambda.seq,each=p),

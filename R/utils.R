@@ -39,15 +39,15 @@ get.var <- function(candidate.index,xs,ys){
 #' @param xs Standardized design matrix
 #' @param ys Standardized outcome
 #' @param lambda \code{lambda} in the lasso
+#' @param lasso An \code{glmnet} object
 #'
 #' @return A vector that contains the point estimates, confidence intervals and the null bound
 
-get.coef <- function(xs,ys,lambda){
+get.coef <- function(xs,ys,lambda,lasso){
 
   p <- ncol(xs)
 
   # evaluate lasso at lambda
-  lasso <- glmnet(xs,ys)
   index <- which(coef(lasso,s=lambda)[-1] != 0)
 
   # define the output
