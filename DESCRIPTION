@@ -1,5 +1,5 @@
 Package: ProSGPV
-Title: Penalized Regression with Second Generation P Values
+Title: Penalized Regression with Second-Generation P-Values
 Version: 0.1.0
 Authors@R: 
     c(person(given = "Yi",
@@ -13,10 +13,11 @@ Authors@R:
       role = c("aut"))
       )
 Maintainer: Yi Zuo <yi.zuo@vanderbilt.edu>
-Description: This package performs variable selection with Second Generation P Values. 
+Description: This package performs variable selection with Second-Generation P-Values. 
     The one-stage algorithm is extremely fast and the two-stage algorithm has lower 
-    parameter estimation bias when data are highly correlated. S3 method 'predict' is 
-    available for both algorithms, and S3 method 'plot' is available for the two-stage algorithm.
+    parameter estimation bias when data are highly correlated. S3 methods 'print',
+    'summary', 'coef', and 'predict' are available for both algorithms, 
+    and S3 method 'plot' is available for the two-stage algorithm.
 Depends: R (>= 3.5.0), glmnet
 License: MIT + file LICENSE
 Encoding: UTF-8
