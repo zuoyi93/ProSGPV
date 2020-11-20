@@ -1,6 +1,10 @@
 ProSGPV
 ========
-Penalized Regression with Second Generation P Values
+Penalized Regression with Second-Generation P-Values
+
+## Introduction
+
+We know that p-values can't be used for variable selection. However, you can do so with second-generation p-values. Here is how.
 
 ## Installation
 
@@ -15,6 +19,8 @@ Here, we use the Tehran housing data as an illustrative example. This data set c
 
 At the end of this section, we also provide an illustration with fewer variables that is discussed in the paper in the [references](#ref).
 
+### One-stage algorithm
+
 ``` r
 # load the package
 library(ProSGPV)
@@ -28,6 +34,7 @@ out.sgpv.1 <- pro.sgpv(x = x, y = y, stage = 1)
 ```
 
 First, let's see the variable selection results using the one-stage algorithm.
+
 ``` r
 out.sgpv.1
 ```
@@ -86,13 +93,24 @@ We can get the predicted values by
 predict(out.sgpv.1)
 ```
 
-S3 method `plot` is also available for the two-stage algorithm.
+### Two-stage algorithm 
+
+We can also use the two-algorithm on the data to gain better parameter estimates.  
 
 ``` r
-# two-stage algorithm
 out.sgpv.2 <- pro.sgpv(x = x, y = y, stage = 2)
+```
+The two-stage algorithm selects the following variables.
 
-# plot the fully relaxed lasso solution path and final solution
+``` r
+out.sgpv.2
+```
+
+    ## Selected variables are V8 V12 V13 V15 V17 V26
+
+S3 method `plot` is available for the two-stage algorithm.
+
+``` r
 plot(out.sgpv.2)
 ```
 First, we plot the full solution path with point estimates and 95% confidence intervals. Note that the null region is in sky blue. The selected variables are colored blue on the y-axis.
@@ -114,6 +132,8 @@ plot(out.sgpv.2,lpv=1,lambda.max=0.01)
 ```
 
 ![](man/figures/fig.3.png)
+
+### Simulation data 
 
 Below is the figure with fewer variables that is shown in the paper down below. Only V3 is the true signal that generates the response. Fully relaxed lasso would have selected both V3 and V4, while our SGPV approach would only select V3.
 
