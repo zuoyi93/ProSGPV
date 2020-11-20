@@ -143,7 +143,7 @@ Below is the figure with fewer variables that is shown in the paper down below. 
 
 The paper that proposed the one- and two-stage algorithms:  
 
-	To be put on Arxiv
+	To be put on arXiv.org
 
 The papers regarding the second generation of p values:  
 
