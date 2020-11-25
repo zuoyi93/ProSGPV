@@ -140,7 +140,7 @@ coef.sgpv <- function(object, ...) {
     colnames(lm.d)[-1] <- object$var.label
     coef(lm(yy ~ ., data = lm.d))
   } else {
-    stop("None of variables are selected.")
+    message("None of variables are selected. Therefore, all coefficient estimates are 0.")
   }
 }
 
@@ -174,7 +174,11 @@ summary.sgpv <- function(object, ...) {
     colnames(lm.d)[-1] <- object$var.label
     summary(lm(Response ~ ., data = lm.d))
   } else {
-    stop("None of variables are selected.")
+    message("None of variables are selected.")
+    message("Therefore, the summary is shown for the model with intercept only")
+    lm.d <- data.frame(yy = object$y)
+    colnames(lm.d)[1] <- "Response"
+    summary(lm(Response ~ 1, data = lm.d))
   }
 }
 
@@ -212,7 +216,12 @@ predict.sgpv <- function(object, newx, ...) {
 
     predict(lm.m, newx)
   } else {
-    stop("None of variables are selected and prediction is not available.")
+    message("None of variables are selected.")
+    message("Therefore, the prediction is based on the intercept only model.")
+
+    lm.d <- data.frame(yy = object$y)
+    lm.m <- lm(yy ~ 1, data = lm.d)
+    predict(lm.m)
   }
 }
 
@@ -255,6 +264,8 @@ predict.sgpv <- function(object, newx, ...) {
 plot.sgpv <- function(x, lpv = 3, lambda.max = NULL, ...) {
   if (is.null(x$lambda)) stop("One-stage algorithm doesn't have the plot function.")
   if (!lpv %in% c(1, 3)) stop("lpv argument only takes values of 1 and 3.")
+
+  if (length(x$var.index) == 0) message("None of variables are selected")
 
   # get information from data
   p <- ncol(x$x)

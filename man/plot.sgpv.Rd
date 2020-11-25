@@ -28,8 +28,8 @@ the standardized scale and the final variable selection results
 library(ProSGPV)
 
 # prepare the data
-x = t.housing[,-ncol(t.housing)]
-y = t.housing$V9
+x <- t.housing[, -ncol(t.housing)]
+y <- t.housing$V9
 
 # two-stage algorithm
 out.sgpv.2 <- pro.sgpv(x = x, y = y, stage = 2)
@@ -38,8 +38,8 @@ out.sgpv.2 <- pro.sgpv(x = x, y = y, stage = 2)
 plot(out.sgpv.2)
 
 # zoom in a little bit
-plot(out.sgpv.2,lambda.max=0.01)
+plot(out.sgpv.2, lambda.max = 0.01)
 
 # only plot one confidence bound
-plot(out.sgpv.2,lpv=1,lambda.max=0.01)
+plot(out.sgpv.2, lpv = 1, lambda.max = 0.01)
 }

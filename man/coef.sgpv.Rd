@@ -23,8 +23,8 @@ S3 method \code{coef} for an S3 object of class \code{sgpv}
 library(ProSGPV)
 
 # prepare the data
-x = t.housing[,-ncol(t.housing)]
-y = t.housing$V9
+x <- t.housing[, -ncol(t.housing)]
+y <- t.housing$V9
 
 # run one-stage algorithm
 out.sgpv.1 <- pro.sgpv(x = x, y = y, stage = 1)
