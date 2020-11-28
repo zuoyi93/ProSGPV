@@ -38,7 +38,8 @@
 #' out.sgpv.1 <- pro.sgpv(x = x, y = y, stage = 1)
 #'
 #' # More examples at https://github.com/zuoyi93/ProSGPV
-pro.sgpv <- function(x, y, stage = 1) {
+pro.sgpv <- function(x, y, stage = c(1,2) ) {
+
   if (!(stage %in% 1:2)) stop("Stage only takes value of 1 or 2.")
 
   if (nrow(x) != length(y)) stop("Input x and y have different number of observations")

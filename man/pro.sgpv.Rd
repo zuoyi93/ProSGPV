@@ -4,7 +4,7 @@
 \alias{pro.sgpv}
 \title{pro.sgpv function}
 \usage{
-pro.sgpv(x, y, stage = 1)
+pro.sgpv(x, y, stage = c(1, 2))
 }
 \arguments{
 \item{x}{Independent variables, can be a \code{matrix} or a \code{data.frame}}

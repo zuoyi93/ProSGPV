@@ -19,6 +19,7 @@ Description: This package performs variable selection with Second-Generation P-V
     'summary', 'coef', and 'predict' are available for both algorithms, 
     and S3 method 'plot' is available for the two-stage algorithm.
 Depends: R (>= 3.5.0), glmnet
+Imports: MASS
 License: MIT + file LICENSE
 Encoding: UTF-8
 URL: https://github.com/zuoyi93/ProSGPV

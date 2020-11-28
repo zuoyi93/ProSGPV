@@ -92,3 +92,73 @@ get.coef <- function(xs, ys, lambda, lasso) {
 
   return(c(out.coef, out.lb, out.ub, null.bound.lasso))
 }
+
+
+#' Generate simulation data
+#'
+#' This function can be used to generate autoregressive simulation data
+#'
+#' @importFrom MASS mvrnorm
+#' @importFrom stats rnorm
+#'
+#' @param n The number of observations
+#' @param p The number of explanatory variables
+#' @param s The number of true signals
+#' @param beta.min The smallest effect size in absolute value
+#' @param beta.max The largest effect size in absolute value
+#' @param rho The autocorrelation level
+#' @param nu The signal to noise ratio
+#' @return A list of following components:
+#' \describe{
+#' \item{X}{The generated explanatory variable matrix}
+#' \item{Y}{A vector of outcome}
+#' \item{index}{The indices of true signals }
+#' }
+#' @export
+#'
+#' @examples
+#' # generate data
+#' data <- gen.data()
+#'
+#' # extract x
+#' x <- data[[1]]
+#'
+#' # extract y
+#' y <- data[[2]]
+#'
+#' # extract the indices of true signals
+#' index <- data[[3]]
+#'
+
+gen.data <- function(n = 100, p = 50, s = 10, beta.min = 1,
+                     beta.max = 5, rho = 0, nu = 2){
+
+  if(s %% 2 ==1) stop("s can only be an even number.")
+
+  # beta coefficients
+  beta <- sample(c(
+    seq(beta.min, beta.max, length.out = s) * c(rep(1, s / 2), rep(-1, s / 2)),
+    rep(0, p - s)
+  ))
+
+  cov.structure <- matrix(0, p, p)
+  for (i in 1:p) {
+    for (j in 1:p) {
+      cov.structure[i, j] <- rho^(abs(i - j))
+    }
+  }
+
+  # mvrnorm for X
+  X <- mvrnorm(n = n, rep(0, p), Sigma = cov.structure)
+
+  # find index for signals
+  index <- which(beta != 0)
+
+  # random error
+  sigma <- sqrt(c(t(beta) %*% cov.structure %*% beta / nu))
+
+  # generate Y
+  Y <- rnorm(X %*% beta, X %*% beta, sd = sigma)
+
+  return(list(X, Y, index))
+}
