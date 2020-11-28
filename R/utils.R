@@ -128,12 +128,13 @@ get.coef <- function(xs, ys, lambda, lasso) {
 #'
 #' # extract the indices of true signals
 #' index <- data[[3]]
-#'
-
 gen.data <- function(n = 100, p = 50, s = 10, beta.min = 1,
-                     beta.max = 5, rho = 0, nu = 2){
-
-  if(s %% 2 ==1) stop("s can only be an even number.")
+                     beta.max = 5, rho = 0, nu = 2) {
+  if (s %% 2 == 1) stop("s can only be an even number.")
+  if (beta.min < 0 | beta.max < 0) stop("The absolute value of the true effect size can not be negative.")
+  if (s > p) stop("The number of signals can not exceed the number of total variables.")
+  if (rho < 0 | rho > 1) stop("rho should be between 0 and 1.")
+  if (nu < 0) stop("SNR can not be negative.")
 
   # beta coefficients
   beta <- sample(c(
