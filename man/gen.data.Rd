@@ -44,5 +44,4 @@ y <- data[[2]]
 
 # extract the indices of true signals
 index <- data[[3]]
-
 }
