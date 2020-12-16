@@ -143,9 +143,9 @@ Below is the figure with fewer variables that is shown in the paper down below. 
 
 The paper that proposed the one- and two-stage algorithms:  
 
-	To be put on arXiv.org
+	Zuo Y, Stewart TG, Blume JD. Variable Selection with Second-Generation P-Values. arXiv preprint arXiv:2012.07941. 2020 Dec 15.
 
-The papers regarding the second generation of p values:  
+The papers regarding the second-generation p-values:  
 
 	Blume JD, Greevy RA, Welty VF, Smith JR, Dupont WD. An introduction to second-generation p-values. The American Statistician. 2019 Mar 29;73(sup1):157-67.
 
