@@ -13,15 +13,15 @@ Authors@R:
       role = c("aut"))
       )
 Maintainer: Yi Zuo <yi.zuo@vanderbilt.edu>
-Description: This package performs variable selection with second-generation p-values. 
-    The one-stage algorithm is extremely fast and the two-stage algorithm has lower 
+Description: Implementation of penalized regression with second-generation p-values for variable
+    selection. The one-stage algorithm is extremely fast and the two-stage algorithm has lower 
     parameter estimation bias when data are highly correlated. S3 methods 'print',
     'summary', 'coef', and 'predict' are available for both algorithms, 
     and S3 method 'plot' is available for the two-stage algorithm. Technical details 
     of the algorithms can be found at <arXiv:2012.07941>. 
 Depends: R (>= 3.5.0), glmnet
 Imports: MASS
-License: MIT + file LICENSE
+License: GPL-3
 Encoding: UTF-8
 URL: https://github.com/zuoyi93/ProSGPV,
      https://arxiv.org/abs/2012.07941
