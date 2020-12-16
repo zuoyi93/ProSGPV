@@ -18,7 +18,7 @@ Description: This package performs variable selection with second-generation p-v
     parameter estimation bias when data are highly correlated. S3 methods 'print',
     'summary', 'coef', and 'predict' are available for both algorithms, 
     and S3 method 'plot' is available for the two-stage algorithm. Technical details 
-    of the algorithms can be found at https://arxiv.org/abs/2012.07941. 
+    of the algorithms can be found at <arXiv:2012.07941>. 
 Depends: R (>= 3.5.0), glmnet
 Imports: MASS
 License: MIT + file LICENSE
