@@ -25,7 +25,8 @@ devtools::install_github("zuoyi93/ProSGPV")
 
 ## Simulation data 
 
-Below is the figure with fewer variables that is shown in the [paper](https://arxiv.org/abs/2012.07941). Only V3 is the true signal that generates the response. Fully relaxed lasso would have selected both V3 and V4, while our SGPV approach would only select V3.
+Below is an illustration of how ProSGPV successfully selects the true support, while lasso and fully relaxed lasso fails. Five variables are simulated and only V3 is associated with the response. Plot (1) presents the lasso solution path. The vertical dotted line is - <img src="https://latex.codecogs.com/png.latex?\lambda_{\text{1se}}" /> . (2) shows the fully relaxed lasso path. (3) shows the fully relaxed lasso paths with their 95% confidence intervals (in lighter color). (4) illustrates the two-stage ProSGPV algorithm selection path. The shaded area is the null region; the colored lines are each 95% confidence bound that is closer to the null region. Lasso and fully relaxed lasso would select both
+V2 and V3, while ProSGPV successfully screens out V2.  
 
 ![](man/figures/fig.4.png)
 
@@ -114,7 +115,7 @@ predict(out.sgpv.1)
 
 ### Two-stage algorithm 
 
-By default, the two-stage ProSGPV algorithm is applied to gain better parameter estimation and it can also deal with high dimensional data where p > n.  
+By default, the two-stage ProSGPV algorithm is applied to gain better parameter estimation and it can also deal with high dimensional data where - <img src="https://latex.codecogs.com/png.latex?p>n" />.  
 
 ``` r
 out.sgpv.2 <- pro.sgpv(x = x, y = y)
