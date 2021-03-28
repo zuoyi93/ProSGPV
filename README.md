@@ -2,24 +2,43 @@ ProSGPV
 ========
 Penalized Regression with Second-Generation P-Values
 
-## Introduction
+# Introduction
 
 We know that p-values can't be used for variable selection. However, you can do so with second-generation p-values. Here is how.
 
-## Installation
+# Installation
+
+To install it on CRAN, you can do
+
+``` r
+install.packages("ProSGPV")
+```
+
+For a development version of ProSGPV, you can install it by running the following command.  
 
 ``` r
 library(devtools)
 devtools::install_github("zuoyi93/ProSGPV")
 ```
 
-## Example
+# Example
 
-Here, we use the Tehran housing data as an illustrative example. This data set contains 26 explanatory variables and one outcome. More details can be found at . 
+## Simulation data 
 
-At the end of this section, we also provide an illustration with fewer variables that is discussed in the paper in the [references](#ref).
+Below is the figure with fewer variables that is shown in the [paper](https://arxiv.org/abs/2012.07941). Only V3 is the true signal that generates the response. Fully relaxed lasso would have selected both V3 and V4, while our SGPV approach would only select V3.
+
+![](man/figures/fig.4.png)
+
+## Real-world data
+
+Here, we use the Tehran housing data as an illustrative real-world data example of how ProSGPV works with linear regression. For GLM example, please refer to the [vignette](vignettes) folder, particularly this [file](vignettes/glm-vignette.Rmd). 
+
+The Tehran housing data contain 26 explanatory variables and one outcome. Details about data collection can be found in this [paper](https://ascelibrary.org/doi/abs/10.1061/%28ASCE%29CO.1943-7862.0001047), and variable description can be found [here](man/t.housing.Rd). 
+
 
 ### One-stage algorithm
+
+First, let's see the variable selection results using the fast one-stage ProSGPV algorithm.
 
 ``` r
 # load the package
@@ -33,7 +52,7 @@ y = t.housing$V9
 out.sgpv.1 <- pro.sgpv(x = x, y = y, stage = 1)
 ```
 
-First, let's see the variable selection results using the one-stage algorithm.
+The selected variables are  
 
 ``` r
 out.sgpv.1
@@ -95,10 +114,10 @@ predict(out.sgpv.1)
 
 ### Two-stage algorithm 
 
-We can also use the two-algorithm on the data to gain better parameter estimates.  
+By default, the two-stage ProSGPV algorithm is applied to gain better parameter estimation and it can also deal with high dimensional data where p > n.  
 
 ``` r
-out.sgpv.2 <- pro.sgpv(x = x, y = y, stage = 2)
+out.sgpv.2 <- pro.sgpv(x = x, y = y)
 ```
 The two-stage algorithm selects the following variables.
 
@@ -133,17 +152,16 @@ plot(out.sgpv.2,lpv=1,lambda.max=0.01)
 
 ![](man/figures/fig.3.png)
 
-### Simulation data 
 
-Below is the figure with fewer variables that is shown in the paper down below. Only V3 is the true signal that generates the response. Fully relaxed lasso would have selected both V3 and V4, while our SGPV approach would only select V3.
+## References
 
-![](man/figures/fig.4.png)
-
-## References <a name="ref"></a>
-
-The paper that proposed the one- and two-stage algorithms:  
+The paper that proposed ProSGPV algorithm in linear regression:  
 
 	Zuo Y, Stewart TG, Blume JD. Variable Selection with Second-Generation P-Values. arXiv preprint arXiv:2012.07941. 2020 Dec 15.
+
+The paper that proposed ProSGPV algorithm in GLM:
+
+	Coming soon
 
 The papers regarding the second-generation p-values:  
 
