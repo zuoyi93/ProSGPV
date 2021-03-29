@@ -2,7 +2,7 @@
 % Please edit documentation in R/pro.sgpv.R
 \name{summary.sgpv}
 \alias{summary.sgpv}
-\title{\code{summary.sgpv}: Summary of the OLS model on selected variables}
+\title{\code{summary.sgpv}: Summary of the final model}
 \usage{
 \method{summary}{sgpv}(object, ...)
 }
@@ -24,8 +24,8 @@ x <- t.housing[, -ncol(t.housing)]
 y <- t.housing$V9
 
 # run one-stage algorithm
-out.sgpv.1 <- pro.sgpv(x = x, y = y, stage = 1)
+out.sgpv <- pro.sgpv(x = x, y = y)
 
 # get regression summary
-summary(out.sgpv.1)
+summary(out.sgpv)
 }

@@ -19,16 +19,13 @@ S3 method \code{coef} for an S3 object of class \code{sgpv}
 }
 \examples{
 
-# load the package
-library(ProSGPV)
-
 # prepare the data
 x <- t.housing[, -ncol(t.housing)]
 y <- t.housing$V9
 
 # run one-stage algorithm
-out.sgpv.1 <- pro.sgpv(x = x, y = y, stage = 1)
+out.sgpv <- pro.sgpv(x = x, y = y)
 
 # get coefficients
-coef(out.sgpv.1)
+coef(out.sgpv)
 }

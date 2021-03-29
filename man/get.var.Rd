@@ -18,7 +18,14 @@ used in the model. It can take the value of \verb{\code{gaussian}}, \verb{\code{
 \verb{\code{poisson}}, and \verb{\code{cox}}.}
 }
 \value{
-Indices of variables selected
+A list of following components:
+\describe{
+\item{out.sgpv}{A vector of indices of selected variables}
+\item{null.bound.p}{Null bound in the SGPV screening}
+\item{pe}{Point estimates in the candidate set}
+\item{lb}{Lower bounds of effect estimates in the candidate set}
+\item{ub}{Upper bounds of effect estimates in the candidate set}
+}
 }
 \description{
 Get the indices of the variables selected by the algorithm

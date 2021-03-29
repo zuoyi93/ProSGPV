@@ -18,21 +18,27 @@ point estimates as well as 95\% confidence interval will be plotted. Default is 
 \item{...}{Other \code{plot} arguments}
 }
 \description{
-S3 method \code{plot} for an object of class \code{sgpv}. This function plots
-the fully relaxed lasso solution path on
-the standardized scale and the final variable selection results
+S3 method \code{plot} for an object of class \code{sgpv}. When the two-stage
+algorithm is used, this function plots the fully relaxed lasso solution path on
+the standardized scale and the final variable selection results. When the
+one-stage algorithm is used, a histogram of all coefficients with selected effects
+is shown.
 }
 \examples{
-
-# load the package
-library(ProSGPV)
 
 # prepare the data
 x <- t.housing[, -ncol(t.housing)]
 y <- t.housing$V9
 
+# one-stage algorithm
+out.sgpv.1 <- pro.sgpv(x = x, y = y, stage = 1)
+
+# plot the selection result
+
+plot(out.sgpv.1)
+
 # two-stage algorithm
-out.sgpv.2 <- pro.sgpv(x = x, y = y, stage = "2")
+out.sgpv.2 <- pro.sgpv(x = x, y = y)
 
 # plot the fully relaxed lasso solution path and final solution
 plot(out.sgpv.2)

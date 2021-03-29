@@ -22,5 +22,6 @@ A list of following components:
 }
 \description{
 Return the selected variables in the most frequent model selected by ProSGPV,
-the random seed to produce the result, and a density plot of model size
+the random seed to produce the result, and a density plot of model size. Examples
+can be found at https://github.com/zuoyi93/ProSGPV/tree/master/vignettes.
 }

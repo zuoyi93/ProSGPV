@@ -34,6 +34,10 @@ A list of following components:
 \item{y}{Input data \code{y}}
 \item{family}{\code{family} from the input}
 \item{stage}{\code{stage} from the input}
+\item{null.bound}{Null bound in the SGPV screening}
+\item{pe.can}{Point estimates in the candidate set}
+\item{lb.can}{Lower bounds of CI in the candidate set}
+\item{ub.can}{Upper bounds of CI in the candidate set}
 }
 }
 \description{

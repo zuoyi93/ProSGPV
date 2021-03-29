@@ -12,11 +12,22 @@
 #'  used in the model. It can take the value of `\code{gaussian}`, `\code{binomial}`,
 #'  `\code{poisson}`, and `\code{cox}`.
 #'
-#' @return Indices of variables selected
+#' @return A list of following components:
+#' \describe{
+#' \item{out.sgpv}{A vector of indices of selected variables}
+#' \item{null.bound.p}{Null bound in the SGPV screening}
+#' \item{pe}{Point estimates in the candidate set}
+#' \item{lb}{Lower bounds of effect estimates in the candidate set}
+#' \item{ub}{Upper bounds of effect estimates in the candidate set}
+#' }
 
 get.var <- function(candidate.index, xs, ys, family) {
   if (length(candidate.index) == 0) {
     out.sgpv <- integer(0)
+    null.bound.p <- NULL
+    pe <- NULL
+    lb <- NULL
+    ub <- NULL
   } else {
     if (family == "gaussian") {
       f.l <- lm(ys ~ xs[, candidate.index])
@@ -44,7 +55,13 @@ get.var <- function(candidate.index, xs, ys, family) {
     out.sgpv <- candidate.index[which(abs(pe) > 1.96 * se + null.bound.p)]
   }
 
-  return(out.sgpv)
+  return(list(
+    out.sgpv,
+    null.bound.p,
+    pe,
+    pe - 1.96 * se,
+    pe + 1.96 * se
+  ))
 }
 
 

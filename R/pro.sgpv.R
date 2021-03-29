@@ -23,6 +23,10 @@
 #' \item{y}{Input data \code{y}}
 #' \item{family}{\code{family} from the input}
 #' \item{stage}{\code{stage} from the input}
+#' \item{null.bound}{Null bound in the SGPV screening}
+#' \item{pe.can}{Point estimates in the candidate set}
+#' \item{lb.can}{Lower bounds of CI in the candidate set}
+#' \item{ub.can}{Upper bounds of CI in the candidate set}
 #' }
 #' @export
 #' @seealso
@@ -43,12 +47,10 @@
 #' # More examples at https://github.com/zuoyi93/ProSGPV/tree/master/vignettes
 pro.sgpv <- function(x, y, stage = c(1, 2),
                      family = c("gaussian", "binomial", "poisson", "cox")) {
-  if (nrow(x) != length(y)) stop("Input x and y have different number of observations")
-
   if (!is.numeric(as.matrix(x)) | !is.numeric(y)) stop("The input data have non-numeric values.")
 
   if (any(complete.cases(x) == F) | any(complete.cases(y) == F)) {
-    warning("Only complete records will be used.")
+    warning("Only complete records will be used.\n")
     comp.index <- complete.cases(data.frame(x, y))
     if (family != "cox") {
       x <- x[comp.index, ]
@@ -88,14 +90,19 @@ pro.sgpv <- function(x, y, stage = c(1, 2),
     } else {
       lasso.cv <- cv.glmnet(xs, Surv(ys[, 1], ys[, 2]), family = "cox")
       lambda <- lasso.cv$lambda.1se
-      candidate.index <- which(coef(lasso.cv, s = lambda) != 0)
+      candidate.index <- which(as.numeric(coef(lasso.cv, s = lambda)) != 0)
     }
   } else {
     candidate.index <- 1:ncol(xs)
     lambda <- NULL
   }
 
-  out.sgpv <- get.var(candidate.index, xs, ys, family)
+  temp <- get.var(candidate.index, xs, ys, family)
+  out.sgpv <- temp[[1]]
+  null.bound <- temp[[2]]
+  pe.can <- temp[[3]]
+  lb.can <- temp[[4]]
+  ub.can <- temp[[5]]
 
   out <- list(
     var.index = out.sgpv,
@@ -104,7 +111,11 @@ pro.sgpv <- function(x, y, stage = c(1, 2),
     x = data.frame(x),
     y = y,
     family = family,
-    stage = stage
+    stage = stage,
+    null.bound = null.bound,
+    pe.can = pe.can,
+    lb.can = lb.can,
+    ub.can = ub.can
   )
 
   class(out) <- "sgpv"
@@ -144,7 +155,7 @@ print.sgpv <- function(x, ...) {
 #'
 #' @importFrom stats coef lm
 #' @importFrom survival coxph Surv
-#'
+#' @importFrom brglm2 brglmFit
 #' @param object An \code{sgpv} object
 #' @param ... Other \code{coef} arguments
 #'
@@ -167,32 +178,33 @@ coef.sgpv <- function(object, ...) {
   if (length(object$var.index) > 0) {
     data.d <- data.frame(yy = object$y, xx = object$x[, object$var.index])
 
-    if(object$family == "gaussian"){
+    if (object$family == "gaussian") {
       out.sgpv.coef <- coef(lm(yy ~ ., data = data.d))[-1]
-    }else if(object$family == "binomial"){
-      out.sgpv.coef <- coef(glm(yy ~ ., family = "binomial", data = data.d,
-                                method = "brglmFit", type = "MPL_Jeffreys"))[-1]
-    }else if(object$family == "poisson"){
+    } else if (object$family == "binomial") {
+      out.sgpv.coef <- coef(glm(yy ~ .,
+        family = "binomial", data = data.d,
+        method = "brglmFit", type = "MPL_Jeffreys"
+      ))[-1]
+    } else if (object$family == "poisson") {
       out.sgpv.coef <- coef(glm(yy ~ ., family = "poisson", data = data.d))[-1]
-    }else{
+    } else {
       cox.m <- coxph(Surv(object$y[, 1], object$y[, 2]) ~
-                           object$x[, object$var.index])
+      as.matrix(object$x[, object$var.index]))
       out.sgpv.coef <- coef(cox.m)
-
     }
 
     for (i in 1:length(object$var.index)) {
       out.coef[object$var.index[i]] <- out.sgpv.coef[i]
     }
-
   }
   out.coef
 }
 
-#' \code{summary.sgpv}: Summary of the OLS model on selected variables
+#' \code{summary.sgpv}: Summary of the final model
 #'
 #' S3 method \code{summary} for an S3 object of class \code{sgpv}
 #'
+#' @importFrom brglm2 brglmFit
 #' @param object An \code{sgpv} object
 #' @param ... Other arguments
 #'
@@ -205,22 +217,53 @@ coef.sgpv <- function(object, ...) {
 #' y <- t.housing$V9
 #'
 #' # run one-stage algorithm
-#' out.sgpv.1 <- pro.sgpv(x = x, y = y, stage = 1)
+#' out.sgpv <- pro.sgpv(x = x, y = y)
 #'
 #' # get regression summary
-#' summary(out.sgpv.1)
+#' summary(out.sgpv)
 summary.sgpv <- function(object, ...) {
   if (length(object$var.index) > 0) {
-    lm.d <- data.frame(yy = object$y, xx = object$x[, object$var.index])
-    colnames(lm.d)[1] <- "Response"
-    colnames(lm.d)[-1] <- object$var.label
-    summary(lm(Response ~ ., data = lm.d))
+    if (object$family != "cox") {
+      data.d <- data.frame(yy = object$y, xx = object$x[, object$var.index])
+      colnames(data.d)[1] <- "Response"
+      colnames(data.d)[-1] <- object$var.label
+
+      if (object$family == "gaussian") {
+        summary(lm(Response ~ ., data = data.d))
+      } else if (object$family == "binomial") {
+        summary(glm(Response ~ .,
+          family = "binomial", data = data.d,
+          method = "brglmFit", type = "MPL_Jeffreys"
+        ))
+      } else {
+        summary(glm(Response ~ ., family = "poisson", data = data.d))
+      }
+    } else {
+      data.d <- data.frame(object$x[, object$var.index])
+      colnames(data.d) <- object$var.label
+      summary(coxph(Surv(object$y[, 1], object$y[, 2]) ~ ., data = data.d))
+    }
   } else {
     message("None of variables are selected.")
-    message("Therefore, the summary is shown for the model with intercept only")
-    lm.d <- data.frame(yy = object$y)
-    colnames(lm.d)[1] <- "Response"
-    summary(lm(Response ~ 1, data = lm.d))
+    message("Therefore, the summary is shown for the model with intercept only\n")
+
+    if (object$family != "cox") {
+      data.d <- data.frame(yy = object$y)
+      colnames(data.d)[1] <- "Response"
+    }
+
+    if (object$family == "gaussian") {
+      summary(lm(Response ~ 1, data = data.d))
+    } else if (object$family == "binomial") {
+      summary(glm(Response ~ 1,
+        family = "binomial", data = data.d,
+        method = "brglmFit", type = "MPL_Jeffreys"
+      ))
+    } else if (object$family == "poisson") {
+      summary(glm(Response ~ 1, family = "poisson", data = data.d))
+    } else {
+      summary(coxph(Surv(object$y[, 1], object$y[, 2]) ~ 1))
+    }
   }
 }
 
@@ -229,51 +272,83 @@ summary.sgpv <- function(object, ...) {
 #' S3 method \code{predict} for an object of class \code{sgpv}
 #'
 #' @importFrom stats lm predict
+#' @importFrom brglm2 brglmFit
+#'
 #' @param object An \code{sgpv} objectect
 #' @param newx Prediction data set
+#' @param type The type of prediction required. Can take the value of `link`,
+#' `response`, and `terms`. Default is `response`.
 #' @param ... Other \code{predict} arguments
 #'
 #' @return Predicted values
 #' @export
 #' @examples
 #'
-#' # load the package
-#' library(ProSGPV)
 #'
 #' # prepare the data
 #' x <- t.housing[, -ncol(t.housing)]
 #' y <- t.housing$V9
 #'
 #' # run one-stage algorithm
-#' out.sgpv.1 <- pro.sgpv(x = x, y = y, stage = 1)
+#' out.sgpv <- pro.sgpv(x = x, y = y)
 #'
-#' predict(out.sgpv.1)
-predict.sgpv <- function(object, newx, ...) {
+#' predict(out.sgpv)
+predict.sgpv <- function(object, newx, type, ...) {
+  if (object$family == "cox") stop("Sorry, prediction method isn't available for Cox models yet.\n")
+
   if (length(object$var.index) > 0) {
-    lm.d <- data.frame(yy = object$y, xx = object$x[, object$var.index])
-    colnames(lm.d)[-1] <- object$var.label
-    lm.m <- lm(yy ~ ., data = lm.d)
+    data.d <- data.frame(Response = object$y, xx = object$x[, object$var.index])
+    colnames(data.d)[-1] <- object$var.label
 
     if (missing(newx)) newx <- object$x
+    if (is.null(colnames(newx))) colnames(newx) <- paste("V", 1:ncol(newx), sep = "")
+    if (missing(type)) type <- "response"
 
-    predict(lm.m, newx)
+    if (object$family == "gaussian") {
+      lm.m <- lm(Response ~ ., data = data.d)
+      predict(lm.m, data.frame(newx))
+    } else if (object$family == "poisson") {
+      glm.m <- glm(Response ~ ., family = "poisson", data = data.d)
+      predict(lm.m, data.frame(newx), type = type)
+    } else {
+      glm.m <- glm(Response ~ .,
+        family = "binomial", data = data.d,
+        method = "brglmFit", type = "MPL_Jeffreys"
+      )
+      predict(glm.m, data.frame(newx), type = type)
+    }
   } else {
     message("None of variables are selected.")
-    message("Therefore, the prediction is based on the intercept only model.")
+    message("Therefore, the prediction is based on the intercept only model.\n")
 
-    lm.d <- data.frame(yy = object$y)
-    lm.m <- lm(yy ~ 1, data = lm.d)
-    predict(lm.m)
+    if (object$family == "gaussian") {
+      data.d <- data.frame(yy = object$y)
+      lm.m <- lm(yy ~ 1, data = data.d)
+      predict(lm.m)
+    } else {
+      glm.m <- glm(yy ~ 1,
+        data = data.frame(
+          yy = object$y,
+          xx = object$x
+        ),
+        family = object$family
+      )
+
+      predict(glm.m, type = "response")
+    }
   }
 }
 
 #' \code{plot.sgpv}: Plot variable selection results
 #'
-#' S3 method \code{plot} for an object of class \code{sgpv}. This function plots
-#' the fully relaxed lasso solution path on
-#' the standardized scale and the final variable selection results
+#' S3 method \code{plot} for an object of class \code{sgpv}. When the two-stage
+#' algorithm is used, this function plots the fully relaxed lasso solution path on
+#' the standardized scale and the final variable selection results. When the
+#' one-stage algorithm is used, a histogram of all coefficients with selected effects
+#' is shown.
 #'
 #' @importFrom graphics abline axis lines mtext polygon
+#' @importFrom graphics legend points
 #' @param x An \code{sgpv} object
 #' @param lpv Lines per variable. It can take the value of 1 meaning that only the
 #' bound that is closest to the null will be plotted, or the value of 3 meaning that
@@ -285,15 +360,19 @@ predict.sgpv <- function(object, newx, ...) {
 #' @export
 #' @examples
 #'
-#' # load the package
-#' library(ProSGPV)
-#'
 #' # prepare the data
 #' x <- t.housing[, -ncol(t.housing)]
 #' y <- t.housing$V9
 #'
+#' # one-stage algorithm
+#' out.sgpv.1 <- pro.sgpv(x = x, y = y, stage = 1)
+#'
+#' # plot the selection result
+#'
+#' plot(out.sgpv.1)
+#'
 #' # two-stage algorithm
-#' out.sgpv.2 <- pro.sgpv(x = x, y = y, stage = "2")
+#' out.sgpv.2 <- pro.sgpv(x = x, y = y)
 #'
 #' # plot the fully relaxed lasso solution path and final solution
 #' plot(out.sgpv.2)
@@ -304,7 +383,6 @@ predict.sgpv <- function(object, newx, ...) {
 #' # only plot one confidence bound
 #' plot(out.sgpv.2, lpv = 1, lambda.max = 0.01)
 plot.sgpv <- function(x, lpv = 3, lambda.max = NULL, ...) {
-  if (is.null(x$lambda)) stop("One-stage algorithm doesn't have the plot function.")
   if (!lpv %in% c(1, 3)) stop("lpv argument only takes values of 1 and 3.")
 
   if (length(x$var.index) == 0) message("None of variables are selected")
@@ -317,138 +395,175 @@ plot.sgpv <- function(x, lpv = 3, lambda.max = NULL, ...) {
   xs <- scale(x$x)
   ys <- scale(x$y)
 
-  # maximum lambda
-  if (is.null(lambda.max)) lambda.max <- max(abs(sapply(1:ncol(xs), function(z) xs[, z] %*% ys)) / nrow(xs)) * 1.1
+  if (x$stage == 2) {
+    # maximum lambda
+    if (is.null(lambda.max)) lambda.max <- max(abs(sapply(1:ncol(xs), function(z) xs[, z] %*% ys)) / nrow(xs)) * 1.1
 
-  step <- lambda.max / 100
+    step <- lambda.max / 100
 
-  # get a sequence of lambda
-  lambda.seq <- seq(0, lambda.max, step)
+    # get a sequence of lambda
+    lambda.seq <- seq(0, lambda.max, step)
 
-  # fit lasso once
-  lasso <- glmnet(xs, ys)
+    # fit lasso once
+    lasso <- glmnet(xs, ys)
 
-  # get coefficient estimates at each lambda
-  results <- sapply(lambda.seq, function(z) get.coef(xs = xs, ys = ys, lambda = z, lasso = lasso))
+    # get coefficient estimates at each lambda
+    results <- sapply(lambda.seq, function(z) get.coef(xs = xs, ys = ys, lambda = z, lasso = lasso))
 
-  # prepare data to plot
-  to.plot <- data.frame(
-    lambda = rep(lambda.seq, each = p),
-    v = rep(x.names, length(lambda.seq)),
-    pe = c(results[1:p, ]),
-    lb = c(results[(p + 1):(2 * p), ]),
-    ub = c(results[(2 * p + 1):(3 * p), ])
-  )
-
-  if (lpv == 1) {
-    to.plot$bound <- ifelse(abs(to.plot$lb) < abs(to.plot$ub), to.plot$lb, to.plot$ub)
-    plot.d <- to.plot[, c("lambda", "v", "bound")]
-
-    # find the location of x.names
-    location.beta <- to.plot$bound[to.plot$lambda == 0]
-  } else if (lpv == 3) {
-    plot.d <- to.plot
-
-    # find the location of x.names
-    location.beta <- to.plot$pe[to.plot$lambda == 0]
-  }
-
-  # get the indices of selected variables
-  selected.index <- x$var.index
-  black.index <- setdiff(1:p, selected.index)
-
-  # change the color of the variables
-  color.use <- c(
-    rep("black", length(black.index)),
-    rep("blue", length(selected.index))
-  )
-
-  location.beta <- location.beta[c(black.index, selected.index)]
-  var.axis <- x.names[c(black.index, selected.index)]
-
-  # find the limit of the canvas
-  if (lpv == 3) {
-    ylim <- c(
-      min(c(location.beta, to.plot$lb, to.plot$ub)) * 1.01,
-      max(c(location.beta, to.plot$lb, to.plot$ub)) * 1.01
+    # prepare data to plot
+    to.plot <- data.frame(
+      lambda = rep(lambda.seq, each = p),
+      v = rep(x.names, length(lambda.seq)),
+      pe = c(results[1:p, ]),
+      lb = c(results[(p + 1):(2 * p), ]),
+      ub = c(results[(2 * p + 1):(3 * p), ])
     )
 
-    ylim <- c(-max(abs(ylim)), max(abs(ylim)))
-    ytick <- c(
-      -round(max(abs(ylim)), 2), -round(max(abs(ylim)), 2) / 2, 0,
-      round(max(abs(ylim)), 2) / 2, round(max(abs(ylim)), 2)
+    if (lpv == 1) {
+      to.plot$bound <- ifelse(abs(to.plot$lb) < abs(to.plot$ub), to.plot$lb, to.plot$ub)
+      plot.d <- to.plot[, c("lambda", "v", "bound")]
+
+      # find the location of x.names
+      location.beta <- to.plot$bound[to.plot$lambda == 0]
+    } else if (lpv == 3) {
+      plot.d <- to.plot
+
+      # find the location of x.names
+      location.beta <- to.plot$pe[to.plot$lambda == 0]
+    }
+
+    # get the indices of selected variables
+    selected.index <- x$var.index
+    black.index <- setdiff(1:p, selected.index)
+
+    # change the color of the variables
+    color.use <- c(
+      rep("black", length(black.index)),
+      rep("blue", length(selected.index))
     )
-  } else if (lpv == 1) {
-    ylim <- c(
-      min(plot.d$bound) * 1.01,
-      max(plot.d$bound) * 1.01
-    )
 
-    ylim <- c(-max(abs(ylim)), max(abs(ylim)))
-    ytick <- c(
-      -round(max(abs(ylim)), 2), -round(max(abs(ylim)), 2) / 2, 0,
-      round(max(abs(ylim)), 2) / 2, round(max(abs(ylim)), 2)
-    )
-  }
+    location.beta <- location.beta[c(black.index, selected.index)]
+    var.axis <- x.names[c(black.index, selected.index)]
 
-  # create a data set for the null bound
-  n.bound <- results[(3 * p + 1), ]
+    # find the limit of the canvas
+    if (lpv == 3) {
+      ylim <- c(
+        min(c(location.beta, to.plot$lb, to.plot$ub)) * 1.01,
+        max(c(location.beta, to.plot$lb, to.plot$ub)) * 1.01
+      )
 
-  # find the lambda.1se
-  vlambda <- x$lambda
+      ylim <- c(-max(abs(ylim)), max(abs(ylim)))
+      ytick <- c(
+        -round(max(abs(ylim)), 2), -round(max(abs(ylim)), 2) / 2, 0,
+        round(max(abs(ylim)), 2) / 2, round(max(abs(ylim)), 2)
+      )
+    } else if (lpv == 1) {
+      ylim <- c(
+        min(plot.d$bound) * 1.01,
+        max(plot.d$bound) * 1.01
+      )
 
-  # plot the results
-  if (lpv == 1) {
-    xvals <- split(plot.d$lambda, plot.d$v)
-    yvals <- split(plot.d$bound, plot.d$v)
+      ylim <- c(-max(abs(ylim)), max(abs(ylim)))
+      ytick <- c(
+        -round(max(abs(ylim)), 2), -round(max(abs(ylim)), 2) / 2, 0,
+        round(max(abs(ylim)), 2) / 2, round(max(abs(ylim)), 2)
+      )
+    }
 
-    plot(lambda.seq,
-      type = "n", ylim = ylim, xlim = c(0, lambda.max),
-      xlab = expression(lambda), ylab = "Bound that is closer to the null",
-      main = "Solution to the two-stage algorithm with one line per variable",
-      axes = F, frame.plot = T
-    )
-    axis(1, at = round(seq(0, lambda.max, length.out = 5), 3))
-    axis(2, at = ytick, labels = c(ytick[1:2], 0, ytick[4:5]))
-    mtext(var.axis, side = 2, at = location.beta, col = color.use)
-    mtext(bquote(lambda["1se"]), side = 1, at = vlambda)
-    polygon(c(lambda.seq, rev(lambda.seq)), c(-n.bound, rev(n.bound)), col = "grey", border = "grey")
-    invisible(mapply(lines, xvals, yvals, col = 1:p))
-    abline(h = 0)
-    abline(v = vlambda, lty = 2)
-  } else if (lpv == 3) {
-    plot(lambda.seq,
-      type = "n", ylim = ylim, xlim = c(0, lambda.max),
-      xlab = expression(lambda), ylab = "Point estimates and confidence intervals",
-      main = "Solution to the two-stage algorithm with three lines per variable",
-      axes = F, frame.plot = T
-    )
-    axis(1, at = round(seq(0, lambda.max, length.out = 5), 3))
-    axis(2, at = ytick, labels = c(ytick[1:2], 0, ytick[4:5]))
+    # create a data set for the null bound
+    n.bound <- results[(3 * p + 1), ]
 
-    # null region
-    polygon(c(lambda.seq, rev(lambda.seq)), c(-n.bound, rev(n.bound)), col = "grey", border = "grey")
+    # find the lambda.1se
+    vlambda <- x$lambda
 
-    # text on axis
-    mtext(var.axis, side = 2, at = location.beta, col = color.use)
-    mtext(bquote(lambda["1se"]), side = 1, at = vlambda)
+    # plot the results
+    if (lpv == 1) {
+      xvals <- split(plot.d$lambda, plot.d$v)
+      yvals <- split(plot.d$bound, plot.d$v)
 
-    # point estimates
-    xvals <- split(plot.d$lambda, plot.d$v)
-    yvals <- split(plot.d$pe, plot.d$v)
-    invisible(mapply(lines, xvals, yvals, col = 1:p))
+      plot(lambda.seq,
+        type = "n", ylim = ylim, xlim = c(0, lambda.max),
+        xlab = expression(lambda), ylab = "Bound that is closer to the null",
+        main = "Solution to the two-stage algorithm with one line per variable",
+        axes = F, frame.plot = T
+      )
+      axis(1, at = round(seq(0, lambda.max, length.out = 5), 3))
+      axis(2, at = ytick, labels = c(ytick[1:2], 0, ytick[4:5]))
+      mtext(var.axis, side = 2, at = location.beta, col = color.use)
+      mtext(bquote(lambda["1se"]), side = 1, at = vlambda)
+      polygon(c(lambda.seq, rev(lambda.seq)), c(-n.bound, rev(n.bound)), col = "grey", border = "grey")
+      invisible(mapply(lines, xvals, yvals, col = 1:p))
+      abline(h = 0)
+      abline(v = vlambda, lty = 2)
+    } else if (lpv == 3) {
+      plot(lambda.seq,
+        type = "n", ylim = ylim, xlim = c(0, lambda.max),
+        xlab = expression(lambda), ylab = "Point estimates and confidence intervals",
+        main = "Solution to the two-stage algorithm with three lines per variable",
+        axes = F, frame.plot = T
+      )
+      axis(1, at = round(seq(0, lambda.max, length.out = 5), 3))
+      axis(2, at = ytick, labels = c(ytick[1:2], 0, ytick[4:5]))
 
-    # upper bound
-    xvals <- split(plot.d$lambda, plot.d$v)
-    yvals <- split(plot.d$ub, plot.d$v)
-    invisible(mapply(lines, xvals, yvals, col = 1:p, lty = 2))
+      # null region
+      polygon(c(lambda.seq, rev(lambda.seq)), c(-n.bound, rev(n.bound)), col = "grey", border = "grey")
 
-    # lower bound
-    xvals <- split(plot.d$lambda, plot.d$v)
-    yvals <- split(plot.d$lb, plot.d$v)
-    invisible(mapply(lines, xvals, yvals, col = 1:p, lty = 2))
+      # text on axis
+      mtext(var.axis, side = 2, at = location.beta, col = color.use)
+      mtext(bquote(lambda["1se"]), side = 1, at = vlambda)
 
-    abline(h = 0)
-    abline(v = vlambda, lty = 2)
+      # point estimates
+      xvals <- split(plot.d$lambda, plot.d$v)
+      yvals <- split(plot.d$pe, plot.d$v)
+      invisible(mapply(lines, xvals, yvals, col = 1:p))
+
+      # upper bound
+      xvals <- split(plot.d$lambda, plot.d$v)
+      yvals <- split(plot.d$ub, plot.d$v)
+      invisible(mapply(lines, xvals, yvals, col = 1:p, lty = 2))
+
+      # lower bound
+      xvals <- split(plot.d$lambda, plot.d$v)
+      yvals <- split(plot.d$lb, plot.d$v)
+      invisible(mapply(lines, xvals, yvals, col = 1:p, lty = 2))
+
+      abline(h = 0)
+      abline(v = vlambda, lty = 2)
+    }
+  } else if (length(x$var.index) > 0) { # one-stage algorithm
+
+    var.names <- colnames(x$x)
+    pe <- x$pe.can
+    lb <- x$lb.can
+    ub <- x$ub.can
+    p <- ncol(x$x)
+    null.bound <- x$null.bound
+
+    col.names <- rep("black",p)
+    col.names[x$var.index] <- "blue"
+
+    # set the x-axis
+    x.lower <- min(lb) * ifelse(min(lb) < 0, 1.1, 0.9)
+    x.upper <- max(ub) * ifelse(max(ub) > 0, 1.1, 0.9)
+
+    plot(0,type="n",xlab="Effect estimates", ylab="Variables",yaxt="n",
+         xlim=c(x.lower,x.upper),
+         ylim=c(0,p+1),
+         main="Selection results in the one-stage algorithm"
+         )
+    mtext(paste("ProSGPV selects",length(x$var.index),"variables."),side=3)
+    lines(x = rep(null.bound, 2), y = c(0, p+1), col = "green4")
+    lines(x = -rep(null.bound, 2), y = c(0, p+1), col = "green4")
+    for(i in 1:p){
+      lines(x=c(lb[i],ub[i]),y=c(i,i),col=col.names[i] )
+      mtext(var.names[i],side=2,at=i,col=col.names[i])
+      points(x=pe[i],y=i,pch=20,col=col.names[i])
+    }
+    legend("topleft",box.col="white",box.lwd=0,
+           legend=c("ProSGPV selection","Null bound"),col=c("blue","green4"),
+           lty=c(1,1),cex=0.8)
+
+  } else {
+    message("All effects in the full model are no different than or overlap with the null.\n")
   }
 }
