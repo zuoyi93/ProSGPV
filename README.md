@@ -2,23 +2,23 @@ ProSGPV
 ========
 Penalized Regression with Second-Generation P-Values
 
-- [Introduction](#introduction)
-- [Installation](#hinstallation)
-- [Example](#example)
-  * [Simulation-data](#simulation-data)
-  * [Real-world-data](#real-world-data)
-    + [One-stage-algorithm](#one-stage-algorithm)
-    + [Two-stage-algorithm](#two-stage-algorithm)
-  * [More-examples](#more-examples)
-- [References](#references)
+- [1. Introduction](#1-introduction)
+- [2. Installation](#2-installation)
+- [3. Example](#3-example)
+  * [3.1 Simulation-data](#31-simulation-data)
+  * [3.2 Real-world-data](#32-real-world-data)
+    + [3.2.1 One-stage-algorithm](#321-one-stage-algorithm)
+    + [3.2.2 Two-stage-algorithm](#322-two-stage-algorithm)
+  * [3.3 More-examples](#33-more-examples)
+- [4. References](#4-references)
 
 <!-- toc -->
 
-# Introduction
+# 1. Introduction
 
 We know that p-values can't be used for variable selection. However, you can do so with second-generation p-values. Here is how.
 
-# Installation
+# 2. Installation
 
 To install it on CRAN, you can do
 
@@ -33,22 +33,22 @@ library(devtools)
 devtools::install_github("zuoyi93/ProSGPV")
 ```
 
-# Example
+# 3. Example
 
-## Simulation data 
+## 3.1 Simulation data 
 
 Below is an illustration of how ProSGPV successfully selects the true support, while lasso and fully relaxed lasso fails. Five variables are simulated and only V3 is associated with the response. Plot (1) presents the lasso solution path. The vertical dotted line is <img src="https://latex.codecogs.com/png.latex?\color{blue}{\lambda_{\text{1se}}}" /> . (2) shows the fully relaxed lasso path. (3) shows the fully relaxed lasso paths with their 95% confidence intervals (in lighter color). (4) illustrates the two-stage ProSGPV algorithm selection path. The shaded area is the null region; the colored lines are each 95% confidence bound that is closer to the null region. Lasso and fully relaxed lasso would select both V2 and V3, while ProSGPV successfully screens out V2.  
 
 ![](man/figures/fig.4.png)
 
-## Real-world data
+## 3.2 Real-world data
 
 Here, we use the Tehran housing data as an illustrative real-world data example of how ProSGPV works with linear regression. 
 
 The Tehran housing data contain 26 explanatory variables and one outcome. Details about data collection can be found in this [paper](https://ascelibrary.org/doi/abs/10.1061/%28ASCE%29CO.1943-7862.0001047), and variable description can be found [here](man/t.housing.Rd). 
 
 
-### One-stage algorithm
+### 3.2.1 One-stage algorithm
 
 First, let's see the variable selection results using the fast one-stage ProSGPV algorithm.
 
@@ -124,7 +124,7 @@ We can get the predicted values by
 predict(out.sgpv.1)
 ```
 
-### Two-stage algorithm 
+### 3.2.2 Two-stage algorithm 
 
 By default, the two-stage ProSGPV algorithm is applied to gain better parameter estimation and it can also deal with high dimensional data where  <img src="https://latex.codecogs.com/png.latex?\color{blue}{p>n}" />.  
 
@@ -164,12 +164,12 @@ plot(out.sgpv.2,lpv=1,lambda.max=0.01)
 
 ![](man/figures/fig.3.png)
 
-## More examples
+## 3.3 More examples
 
 For GLM examples, please refer to the [vignette](vignettes) folder, particularly this [file](vignettes/glm-vignette.Rmd). 
 
 
-# References
+# 4. References
 
 The paper that proposed ProSGPV algorithm in linear regression:  
 
