@@ -2,7 +2,7 @@
 % Please edit documentation in R/pro.sgpv.R
 \name{predict.sgpv}
 \alias{predict.sgpv}
-\title{Prediction using the fitted model}
+\title{\code{predict.sgpv}: Prediction using the fitted model}
 \usage{
 \method{predict}{sgpv}(object, newx, ...)
 }

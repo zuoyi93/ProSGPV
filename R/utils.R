@@ -1,8 +1,10 @@
-#' Get indices
+#' \code{get.var}: Get indices
 #'
 #' Get the indices of the variables selected by the algorithm
 #'
-#' @importFrom stats lm
+#' @importFrom stats lm glm
+#' @importFrom survival Surv coxph
+#' @importFrom brglm2 brglmFit
 #' @param candidate.index Indices of the candidate set
 #' @param xs Standardized independent variables
 #' @param ys Standardized dependent variable
@@ -16,13 +18,26 @@ get.var <- function(candidate.index, xs, ys, family) {
   if (length(candidate.index) == 0) {
     out.sgpv <- integer(0)
   } else {
+    if (family == "gaussian") {
+      f.l <- lm(ys ~ xs[, candidate.index])
+      pe <- summary(f.l)$coef[-1, 1]
+      se <- summary(f.l)$coef[-1, 2]
+    } else if (family == "binomial") {
+      glm.m <- glm(ys ~ xs[, candidate.index],
+        family = family, method = "brglmFit", type = "MPL_Jeffreys"
+      )
+      pe <- coef(glm.m)[-1]
+      se <- summary(glm.m)$coef[-1, 2]
+    } else if (family == "poisson") {
+      glm.m <- glm(ys ~ xs[, candidate.index], family = family)
+      pe <- coef(glm.m)[-1]
+      se <- summary(glm.m)$coef[-1, 2]
+    } else {
+      cox.m <- coxph(Surv(ys[, 1], ys[, 2]) ~ xs[, candidate.index])
+      pe <- coef(cox.m)
+      se <- summary(cox.m)$coef[, 3]
+    }
 
-    # run fully relaxed LASSO
-    f.l <- lm(ys ~ xs[, candidate.index])
-
-    # get confidence bands
-    pe <- summary(f.l)$coef[-1, 1]
-    se <- summary(f.l)$coef[-1, 2]
     null.bound.p <- mean(se)
 
     # screen variables
@@ -33,7 +48,7 @@ get.var <- function(candidate.index, xs, ys, family) {
 }
 
 
-#' Get coefficients at each \code{lambda}
+#' \code{get.coef}: Get coefficients at each \code{lambda}
 #'
 #' Get the coefficients and confidence intervals from regression at each \code{lambda}
 #' as well as the null bound in SGPVs
@@ -100,7 +115,7 @@ get.coef <- function(xs, ys, lambda, lasso, family) {
 }
 
 
-#' Generate simulation data
+#' \code{gen.sim.data}: Generate simulation data
 #'
 #' This function can be used to generate autoregressive simulation data
 #'
@@ -244,11 +259,35 @@ gen.sim.data <- function(n = 100, p = 50, s = 10,
   return(list(X, Y, index, beta))
 }
 
+#' \code{one.time.size}: utility function for \code{which.sgpv} function
+#'
+#' Return the selected model as well as the model size in each iteration
+#'
+#' @param x Input X
+#' @param y Input Y
+#' @param family A description of the error distribution and link function to be
+#'  used in the model. It can take the value of `\code{gaussian}`, `\code{binomial}`,
+#'  `\code{poisson}`, and `\code{cox}`. Default is `\code{gaussian}`
+#'
+#' @return A list of following components:
+#' \describe{
+#' \item{model}{The indices of selected variables}
+#' \item{size}{The size of the model}
+#' }
 
-#' Find the most frequent model selected by the two-stage ProSGPV
+one.time.size <- function(x, y, family) {
+  out <- pro.sgpv(x, y, family = family)
+
+  return(list(out$var.index, length(out$var.index)))
+}
+
+#' which.sgpv: Find the most frequent model selected by the two-stage ProSGPV
 #'
 #' Return the selected variables in the most frequent model selected by ProSGPV,
-#' the random seed to produce the result, and a histogram of model size
+#' the random seed to produce the result, and a density plot of model size. Examples
+#' can be found at https://github.com/zuoyi93/ProSGPV/tree/master/vignettes.
+#'
+#' @importFrom stats density
 #'
 #' @param num.sim Number of repetitions. Default is 1000
 #' @param object An \code{sgpv} object
@@ -258,26 +297,61 @@ gen.sim.data <- function(n = 100, p = 50, s = 10,
 #' \item{var.index}{The indices of selected variables in the most frequent model}
 #' \item{var.label}{Labels of selected variables in the most frequent model}
 #' \item{random.seed}{A random seed to reproduce the selection result}
-#' \item{hist.plot}{A histogram of model size over repetitions}
+#' \item{models}{A list of unqiue models sorted by frequency}
 #' }
 #' @export
-#'
 
 which.sgpv <- function(num.sim = 1e3, object) {
   if (class(object) != "sgpv") stop("`object` has to be of class `sgpv`.")
 
   if (object$stage == 1) {
-    cat("The one-stage algorithm always selects", object$var.label, "\n")
+    if (length(object$var.label) > 0) {
+      cat("The one-stage algorithm always selects", object$var.label, "\n")
+    } else {
+      cat("The one-stage algorithm always selects none of the variables.\n")
+    }
+
     return(list(
       var.index = object$var.index,
       var.label = object$var.label,
       random.seed = 1,
-      hist.plot = NULL
+      models = object$var.index
     ))
-  } else {
+  } else { # two-stage algorithm
 
+    temp <- replicate(num.sim, one.time.size(object$x, object$y, object$family))
 
+    # the most frequent model
+    out.1 <- names(sort(table(paste(temp[1, ])), decreasing = T)[1])
+    out.1 <- unlist(regmatches(out.1, gregexpr("\\(?[0-9,.]+", out.1)))
+    out.1 <- as.numeric(gsub("\\(", "", gsub(",", "", out.1)))
 
+    # find the random seed to reproduce the result
+    i <- 1
+    while (T) {
+      set.seed(i)
+      if (setequal(
+        pro.sgpv(object$x, object$y, family = object$family)$var.index,
+        out.1
+      )) {
+        break
+      }
+      i <- i + 1
+    }
 
+    # make a histogram
+
+    plot(density(unlist(temp[2, ])),
+      main = "Density of model size",
+      xlab = "Model size"
+    )
+    polygon(density(unlist(temp[2, ])), col = "red", border = "blue")
+
+    return(list(
+      var.index = out.1,
+      var.label = colnames(object$x)[out.1],
+      random.seed = i,
+      models = sort(table(paste(temp[1, ])), decreasing = T)
+    ))
   }
 }

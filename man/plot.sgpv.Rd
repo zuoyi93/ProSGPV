@@ -2,7 +2,7 @@
 % Please edit documentation in R/pro.sgpv.R
 \name{plot.sgpv}
 \alias{plot.sgpv}
-\title{Plot variable selection results}
+\title{\code{plot.sgpv}: Plot variable selection results}
 \usage{
 \method{plot}{sgpv}(x, lpv = 3, lambda.max = NULL, ...)
 }
@@ -32,7 +32,7 @@ x <- t.housing[, -ncol(t.housing)]
 y <- t.housing$V9
 
 # two-stage algorithm
-out.sgpv.2 <- pro.sgpv(x = x, y = y, stage = 2)
+out.sgpv.2 <- pro.sgpv(x = x, y = y, stage = "2")
 
 # plot the fully relaxed lasso solution path and final solution
 plot(out.sgpv.2)

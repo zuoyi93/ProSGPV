@@ -2,7 +2,7 @@
 % Please edit documentation in R/utils.R
 \name{get.coef}
 \alias{get.coef}
-\title{Get coefficients at each \code{lambda}}
+\title{\code{get.coef}: Get coefficients at each \code{lambda}}
 \usage{
 get.coef(xs, ys, lambda, lasso, family)
 }

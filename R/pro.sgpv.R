@@ -1,4 +1,4 @@
-#' pro.sgpv function
+#' \code{pro.sgpv} function
 #'
 #' This function outputs the variable selection results
 #' from either one-stage algorithm or two-stage algorithm.
@@ -43,7 +43,6 @@
 #' # More examples at https://github.com/zuoyi93/ProSGPV/tree/master/vignettes
 pro.sgpv <- function(x, y, stage = c(1, 2),
                      family = c("gaussian", "binomial", "poisson", "cox")) {
-
   if (nrow(x) != length(y)) stop("Input x and y have different number of observations")
 
   if (!is.numeric(as.matrix(x)) | !is.numeric(y)) stop("The input data have non-numeric values.")
@@ -51,52 +50,52 @@ pro.sgpv <- function(x, y, stage = c(1, 2),
   if (any(complete.cases(x) == F) | any(complete.cases(y) == F)) {
     warning("Only complete records will be used.")
     comp.index <- complete.cases(data.frame(x, y))
-    if(family != "cox"){
+    if (family != "cox") {
       x <- x[comp.index, ]
       y <- y[comp.index]
-    }else{
+    } else {
       x <- x[comp.index, ]
-      y <- y[comp.index,]
+      y <- y[comp.index, ]
     }
-
   }
 
-  if(missing(stage)) stage <- 2
-  if(missing(family)) family <- "gaussian"
+  if (missing(stage)) stage <- 2
+  if (!stage %in% c(1, 2)) stop("`stage` only takes 1 or 2.")
 
-  stage <- match.arg(stage)
+  if (missing(family)) family <- "gaussian"
   family <- match.arg(family)
 
-  if(stage == 1 & nrow(x)<ncol(x)) stage <- 2
+  # when p > n, only two-stage is available
+  if (stage == 1 & nrow(x) < ncol(x)) stage <- 2
 
   if (is.null(colnames(x))) colnames(x) <- paste("V", 1:ncol(x), sep = "")
 
-  if(family == "gaussian"){
+  # standardize inputs in linear regression
+  if (family == "gaussian") {
     xs <- scale(x)
     ys <- scale(y)
-  }else{
+  } else {
     xs <- as.matrix(x)
     ys <- y
   }
 
-
+  # get candidate set
   if (stage == 2) {
-
-    if(family != "cox"){
-
+    if (family != "cox") {
       lasso.cv <- cv.glmnet(xs, ys, family = family)
       lambda <- lasso.cv$lambda.1se
       candidate.index <- which(coef(lasso.cv, s = lambda)[-1] != 0)
-    }else{
+    } else {
+      lasso.cv <- cv.glmnet(xs, Surv(ys[, 1], ys[, 2]), family = "cox")
+      lambda <- lasso.cv$lambda.1se
       candidate.index <- which(coef(lasso.cv, s = lambda) != 0)
     }
-
   } else {
     candidate.index <- 1:ncol(xs)
     lambda <- NULL
   }
 
-  out.sgpv <- get.var(candidate.index, xs, ys)
+  out.sgpv <- get.var(candidate.index, xs, ys, family)
 
   out <- list(
     var.index = out.sgpv,
@@ -112,7 +111,7 @@ pro.sgpv <- function(x, y, stage = c(1, 2),
   return(out)
 }
 
-#' Print variable selection results
+#' \code{print.sgpv}: Print variable selection results
 #'
 #' S3 method \code{print} for an S3 object of class \code{sgpv}
 #'
@@ -122,9 +121,6 @@ pro.sgpv <- function(x, y, stage = c(1, 2),
 #' @return Variable selection results
 #' @export
 #' @examples
-#'
-#' # load the package
-#' library(ProSGPV)
 #'
 #' # prepare the data
 #' x <- t.housing[, -ncol(t.housing)]
@@ -142,11 +138,13 @@ print.sgpv <- function(x, ...) {
   }
 }
 
-#' Extract coefficients from the model fit
+#' \code{coef.sgpv}: Extract coefficients from the model fit
 #'
 #' S3 method \code{coef} for an S3 object of class \code{sgpv}
 #'
 #' @importFrom stats coef lm
+#' @importFrom survival coxph Surv
+#'
 #' @param object An \code{sgpv} object
 #' @param ... Other \code{coef} arguments
 #'
@@ -154,41 +152,53 @@ print.sgpv <- function(x, ...) {
 #' @export
 #' @examples
 #'
-#' # load the package
-#' library(ProSGPV)
-#'
 #' # prepare the data
 #' x <- t.housing[, -ncol(t.housing)]
 #' y <- t.housing$V9
 #'
 #' # run one-stage algorithm
-#' out.sgpv.1 <- pro.sgpv(x = x, y = y, stage = 1)
+#' out.sgpv <- pro.sgpv(x = x, y = y)
 #'
 #' # get coefficients
-#' coef(out.sgpv.1)
+#' coef(out.sgpv)
 coef.sgpv <- function(object, ...) {
+  out.coef <- numeric(ncol(object$x))
+
   if (length(object$var.index) > 0) {
-    lm.d <- data.frame(yy = object$y, xx = object$x[, object$var.index])
-    colnames(lm.d)[-1] <- object$var.label
-    coef(lm(yy ~ ., data = lm.d))
-  } else {
-    message("None of variables are selected. Therefore, all coefficient estimates are 0.")
+    data.d <- data.frame(yy = object$y, xx = object$x[, object$var.index])
+
+    if(object$family == "gaussian"){
+      out.sgpv.coef <- coef(lm(yy ~ ., data = data.d))[-1]
+    }else if(object$family == "binomial"){
+      out.sgpv.coef <- coef(glm(yy ~ ., family = "binomial", data = data.d,
+                                method = "brglmFit", type = "MPL_Jeffreys"))[-1]
+    }else if(object$family == "poisson"){
+      out.sgpv.coef <- coef(glm(yy ~ ., family = "poisson", data = data.d))[-1]
+    }else{
+      cox.m <- coxph(Surv(object$y[, 1], object$y[, 2]) ~
+                           object$x[, object$var.index])
+      out.sgpv.coef <- coef(cox.m)
+
+    }
+
+    for (i in 1:length(object$var.index)) {
+      out.coef[object$var.index[i]] <- out.sgpv.coef[i]
+    }
+
   }
+  out.coef
 }
 
-#' Summary of the OLS model on selected variables
+#' \code{summary.sgpv}: Summary of the OLS model on selected variables
 #'
 #' S3 method \code{summary} for an S3 object of class \code{sgpv}
 #'
 #' @param object An \code{sgpv} object
 #' @param ... Other arguments
 #'
-#' @return Summary of an OLS model
+#' @return Summary of a model
 #' @export
 #' @examples
-#'
-#' # load the package
-#' library(ProSGPV)
 #'
 #' # prepare the data
 #' x <- t.housing[, -ncol(t.housing)]
@@ -214,7 +224,7 @@ summary.sgpv <- function(object, ...) {
   }
 }
 
-#' Prediction using the fitted model
+#' \code{predict.sgpv}: Prediction using the fitted model
 #'
 #' S3 method \code{predict} for an object of class \code{sgpv}
 #'
@@ -257,7 +267,7 @@ predict.sgpv <- function(object, newx, ...) {
   }
 }
 
-#' Plot variable selection results
+#' \code{plot.sgpv}: Plot variable selection results
 #'
 #' S3 method \code{plot} for an object of class \code{sgpv}. This function plots
 #' the fully relaxed lasso solution path on
@@ -283,7 +293,7 @@ predict.sgpv <- function(object, newx, ...) {
 #' y <- t.housing$V9
 #'
 #' # two-stage algorithm
-#' out.sgpv.2 <- pro.sgpv(x = x, y = y, stage = 2)
+#' out.sgpv.2 <- pro.sgpv(x = x, y = y, stage = "2")
 #'
 #' # plot the fully relaxed lasso solution path and final solution
 #' plot(out.sgpv.2)

@@ -2,7 +2,7 @@
 % Please edit documentation in R/pro.sgpv.R
 \name{coef.sgpv}
 \alias{coef.sgpv}
-\title{Extract coefficients from the model fit}
+\title{\code{coef.sgpv}: Extract coefficients from the model fit}
 \usage{
 \method{coef}{sgpv}(object, ...)
 }

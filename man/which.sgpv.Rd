@@ -2,7 +2,7 @@
 % Please edit documentation in R/utils.R
 \name{which.sgpv}
 \alias{which.sgpv}
-\title{Find the most frequent model selected by the two-stage ProSGPV}
+\title{which.sgpv: Find the most frequent model selected by the two-stage ProSGPV}
 \usage{
 which.sgpv(num.sim = 1000, object)
 }
@@ -17,10 +17,10 @@ A list of following components:
 \item{var.index}{The indices of selected variables in the most frequent model}
 \item{var.label}{Labels of selected variables in the most frequent model}
 \item{random.seed}{A random seed to reproduce the selection result}
-\item{hist.plot}{A histogram of model size over repetitions}
+\item{models}{A list of unqiue models sorted by frequency}
 }
 }
 \description{
 Return the selected variables in the most frequent model selected by ProSGPV,
-the random seed to produce the result, and a histogram of model size
+the random seed to produce the result, and a density plot of model size
 }

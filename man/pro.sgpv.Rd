@@ -2,9 +2,14 @@
 % Please edit documentation in R/pro.sgpv.R
 \name{pro.sgpv}
 \alias{pro.sgpv}
-\title{pro.sgpv function}
+\title{\code{pro.sgpv} function}
 \usage{
-pro.sgpv(x, y, stage = c(1, 2))
+pro.sgpv(
+  x,
+  y,
+  stage = c(1, 2),
+  family = c("gaussian", "binomial", "poisson", "cox")
+)
 }
 \arguments{
 \item{x}{Independent variables, can be a \code{matrix} or a \code{data.frame}}
@@ -36,7 +41,6 @@ This function outputs the variable selection results
 from either one-stage algorithm or two-stage algorithm.
 }
 \examples{
-
 
 # prepare the data
 x <- t.housing[, -ncol(t.housing)]

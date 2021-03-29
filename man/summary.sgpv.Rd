@@ -2,7 +2,7 @@
 % Please edit documentation in R/pro.sgpv.R
 \name{summary.sgpv}
 \alias{summary.sgpv}
-\title{Summary of the OLS model on selected variables}
+\title{\code{summary.sgpv}: Summary of the OLS model on selected variables}
 \usage{
 \method{summary}{sgpv}(object, ...)
 }
@@ -12,15 +12,12 @@
 \item{...}{Other arguments}
 }
 \value{
-Summary of an OLS model
+Summary of a model
 }
 \description{
 S3 method \code{summary} for an S3 object of class \code{sgpv}
 }
 \examples{
-
-# load the package
-library(ProSGPV)
 
 # prepare the data
 x <- t.housing[, -ncol(t.housing)]

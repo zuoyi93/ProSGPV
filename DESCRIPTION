@@ -18,7 +18,7 @@ Description: Implementation of penalized regression with second-generation p-val
     summary(), coef(), predict(), and plot() are available for the algorithm. Technical details
     can be found at <arXiv:2012.07941>. 
 Depends: R (>= 3.5.0), glmnet
-Imports: MASS
+Imports: MASS, survival, brglm2
 License: GPL-3
 Encoding: UTF-8
 URL: https://github.com/zuoyi93/ProSGPV,

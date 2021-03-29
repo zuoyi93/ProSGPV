@@ -2,7 +2,7 @@
 % Please edit documentation in R/utils.R
 \name{get.var}
 \alias{get.var}
-\title{Get indices}
+\title{\code{get.var}: Get indices}
 \usage{
 get.var(candidate.index, xs, ys, family)
 }

@@ -2,7 +2,7 @@
 % Please edit documentation in R/utils.R
 \name{gen.sim.data}
 \alias{gen.sim.data}
-\title{Generate simulation data}
+\title{\code{gen.sim.data}: Generate simulation data}
 \usage{
 gen.sim.data(
   n = 100,
@@ -93,5 +93,4 @@ index <- data.logistic[[3]]
 
 # extract the true coefficient vector
 true.beta <- data.logistic[[4]]
-
 }
