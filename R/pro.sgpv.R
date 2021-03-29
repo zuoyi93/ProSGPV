@@ -8,7 +8,11 @@
 #' @param x Independent variables, can be a \code{matrix} or a \code{data.frame}
 #' @param y Dependent variable, can be a \code{vector} or a column from a \code{data.frame}
 #' @param stage Algorithm indicator. 1 denotes the one-stage algorithm and
-#' 2 denotes the two-stage algorithm. Default is 1.
+#' 2 denotes the two-stage algorithm. Default is 2. When \code{n} is less than \code{p},
+#' only the two-stage algorithm is available.
+#' @param family A description of the error distribution and link function to be
+#'  used in the model. It can take the value of `\code{gaussian}`, `\code{binomial}`,
+#'  `\code{poisson}`, and `\code{cox}`. Default is `\code{gaussian}`
 #'
 #' @return A list of following components:
 #' \describe{
@@ -17,6 +21,8 @@
 #' \item{lambda}{Cross-validated lambda in the two-stage algorithm. \code{NULL} for the one-stage algorithm}
 #' \item{x}{Input data \code{x}}
 #' \item{y}{Input data \code{y}}
+#' \item{family}{\code{family} from the input}
+#' \item{stage}{\code{stage} from the input}
 #' }
 #' @export
 #' @seealso
@@ -27,19 +33,16 @@
 #' * [plot.sgpv()] plots variable selection results
 #' @examples
 #'
-#' # load the package
-#' library(ProSGPV)
-#'
 #' # prepare the data
 #' x <- t.housing[, -ncol(t.housing)]
 #' y <- t.housing$V9
 #'
-#' # run one-stage algorithm
-#' out.sgpv.1 <- pro.sgpv(x = x, y = y, stage = 1)
+#' # run ProSGPV in linear regression
+#' out.sgpv <- pro.sgpv(x = x, y = y)
 #'
-#' # More examples at https://github.com/zuoyi93/ProSGPV
-pro.sgpv <- function(x, y, stage = c(1, 2)) {
-  if (!(stage %in% 1:2)) stop("Stage only takes value of 1 or 2.")
+#' # More examples at https://github.com/zuoyi93/ProSGPV/tree/master/vignettes
+pro.sgpv <- function(x, y, stage = c(1, 2),
+                     family = c("gaussian", "binomial", "poisson", "cox")) {
 
   if (nrow(x) != length(y)) stop("Input x and y have different number of observations")
 
@@ -48,19 +51,46 @@ pro.sgpv <- function(x, y, stage = c(1, 2)) {
   if (any(complete.cases(x) == F) | any(complete.cases(y) == F)) {
     warning("Only complete records will be used.")
     comp.index <- complete.cases(data.frame(x, y))
-    x <- x[comp.index, ]
-    y <- y[comp.index]
+    if(family != "cox"){
+      x <- x[comp.index, ]
+      y <- y[comp.index]
+    }else{
+      x <- x[comp.index, ]
+      y <- y[comp.index,]
+    }
+
   }
+
+  if(missing(stage)) stage <- 2
+  if(missing(family)) family <- "gaussian"
+
+  stage <- match.arg(stage)
+  family <- match.arg(family)
+
+  if(stage == 1 & nrow(x)<ncol(x)) stage <- 2
 
   if (is.null(colnames(x))) colnames(x) <- paste("V", 1:ncol(x), sep = "")
 
-  xs <- scale(x)
-  ys <- scale(y)
+  if(family == "gaussian"){
+    xs <- scale(x)
+    ys <- scale(y)
+  }else{
+    xs <- as.matrix(x)
+    ys <- y
+  }
+
 
   if (stage == 2) {
-    lasso.cv <- cv.glmnet(xs, ys)
-    lambda <- lasso.cv$lambda.1se
-    candidate.index <- which(coef(lasso.cv, s = lambda)[-1] != 0)
+
+    if(family != "cox"){
+
+      lasso.cv <- cv.glmnet(xs, ys, family = family)
+      lambda <- lasso.cv$lambda.1se
+      candidate.index <- which(coef(lasso.cv, s = lambda)[-1] != 0)
+    }else{
+      candidate.index <- which(coef(lasso.cv, s = lambda) != 0)
+    }
+
   } else {
     candidate.index <- 1:ncol(xs)
     lambda <- NULL
@@ -72,8 +102,10 @@ pro.sgpv <- function(x, y, stage = c(1, 2)) {
     var.index = out.sgpv,
     var.label = colnames(x)[out.sgpv],
     lambda = lambda,
-    x = x,
-    y = y
+    x = data.frame(x),
+    y = y,
+    family = family,
+    stage = stage
   )
 
   class(out) <- "sgpv"
@@ -104,9 +136,9 @@ pro.sgpv <- function(x, y, stage = c(1, 2)) {
 #' out.sgpv.1
 print.sgpv <- function(x, ...) {
   if (length(x$var.index) > 0) {
-    cat("Selected variables are", x$var.label)
+    cat("Selected variables are", x$var.label, "\n")
   } else {
-    cat("None of variables are selected.")
+    cat("None of variables are selected.\n")
   }
 }
 

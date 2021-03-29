@@ -12,7 +12,12 @@ pro.sgpv(x, y, stage = c(1, 2))
 \item{y}{Dependent variable, can be a \code{vector} or a column from a \code{data.frame}}
 
 \item{stage}{Algorithm indicator. 1 denotes the one-stage algorithm and
-2 denotes the two-stage algorithm. Default is 1.}
+2 denotes the two-stage algorithm. Default is 2. When \code{n} is less than \code{p},
+only the two-stage algorithm is available.}
+
+\item{family}{A description of the error distribution and link function to be
+used in the model. It can take the value of \verb{\code{gaussian}}, \verb{\code{binomial}},
+\verb{\code{poisson}}, and \verb{\code{cox}}. Default is \verb{\code{gaussian}}}
 }
 \value{
 A list of following components:
@@ -22,6 +27,8 @@ A list of following components:
 \item{lambda}{Cross-validated lambda in the two-stage algorithm. \code{NULL} for the one-stage algorithm}
 \item{x}{Input data \code{x}}
 \item{y}{Input data \code{y}}
+\item{family}{\code{family} from the input}
+\item{stage}{\code{stage} from the input}
 }
 }
 \description{
@@ -30,17 +37,15 @@ from either one-stage algorithm or two-stage algorithm.
 }
 \examples{
 
-# load the package
-library(ProSGPV)
 
 # prepare the data
 x <- t.housing[, -ncol(t.housing)]
 y <- t.housing$V9
 
-# run one-stage algorithm
-out.sgpv.1 <- pro.sgpv(x = x, y = y, stage = 1)
+# run ProSGPV in linear regression
+out.sgpv <- pro.sgpv(x = x, y = y)
 
-# More examples at https://github.com/zuoyi93/ProSGPV
+# More examples at https://github.com/zuoyi93/ProSGPV/tree/master/vignettes
 }
 \seealso{
 \itemize{

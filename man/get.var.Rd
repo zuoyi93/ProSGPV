@@ -4,7 +4,7 @@
 \alias{get.var}
 \title{Get indices}
 \usage{
-get.var(candidate.index, xs, ys)
+get.var(candidate.index, xs, ys, family)
 }
 \arguments{
 \item{candidate.index}{Indices of the candidate set}
@@ -12,6 +12,10 @@ get.var(candidate.index, xs, ys)
 \item{xs}{Standardized independent variables}
 
 \item{ys}{Standardized dependent variable}
+
+\item{family}{A description of the error distribution and link function to be
+used in the model. It can take the value of \verb{\code{gaussian}}, \verb{\code{binomial}},
+\verb{\code{poisson}}, and \verb{\code{cox}}.}
 }
 \value{
 Indices of variables selected

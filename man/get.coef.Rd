@@ -4,7 +4,7 @@
 \alias{get.coef}
 \title{Get coefficients at each \code{lambda}}
 \usage{
-get.coef(xs, ys, lambda, lasso)
+get.coef(xs, ys, lambda, lasso, family)
 }
 \arguments{
 \item{xs}{Standardized design matrix}
@@ -14,6 +14,10 @@ get.coef(xs, ys, lambda, lasso)
 \item{lambda}{\code{lambda} in the lasso}
 
 \item{lasso}{An \code{glmnet} object}
+
+\item{family}{A description of the error distribution and link function to be
+used in the model. It can take the value of \verb{\code{gaussian}}, \verb{\code{binomial}},
+\verb{\code{poisson}}, and \verb{\code{cox}}.}
 }
 \value{
 A vector that contains the point estimates, confidence intervals and the null bound

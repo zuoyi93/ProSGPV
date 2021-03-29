@@ -2,6 +2,18 @@ ProSGPV
 ========
 Penalized Regression with Second-Generation P-Values
 
+- [Introduction](#introduction)
+- [Installation](#hinstallation)
+- [Example](#example)
+  * [Simulation-data](#simulation-data)
+  * [Real-world-data](#real-world-data)
+    + [One-stage-algorithm](#one-stage-algorithm)
+    + [Two-stage-algorithm](#two-stage-algorithm)
+  * [More-examples](#more-examples)
+- [References](#references)
+
+<!-- toc -->
+
 # Introduction
 
 We know that p-values can't be used for variable selection. However, you can do so with second-generation p-values. Here is how.
@@ -25,14 +37,13 @@ devtools::install_github("zuoyi93/ProSGPV")
 
 ## Simulation data 
 
-Below is an illustration of how ProSGPV successfully selects the true support, while lasso and fully relaxed lasso fails. Five variables are simulated and only V3 is associated with the response. Plot (1) presents the lasso solution path. The vertical dotted line is <img src="https://latex.codecogs.com/png.latex?\color{white}{\lambda_{\text{1se}}}" /> . (2) shows the fully relaxed lasso path. (3) shows the fully relaxed lasso paths with their 95% confidence intervals (in lighter color). (4) illustrates the two-stage ProSGPV algorithm selection path. The shaded area is the null region; the colored lines are each 95% confidence bound that is closer to the null region. Lasso and fully relaxed lasso would select both
-V2 and V3, while ProSGPV successfully screens out V2.  
+Below is an illustration of how ProSGPV successfully selects the true support, while lasso and fully relaxed lasso fails. Five variables are simulated and only V3 is associated with the response. Plot (1) presents the lasso solution path. The vertical dotted line is <img src="https://latex.codecogs.com/png.latex?\color{blue}{\lambda_{\text{1se}}}" /> . (2) shows the fully relaxed lasso path. (3) shows the fully relaxed lasso paths with their 95% confidence intervals (in lighter color). (4) illustrates the two-stage ProSGPV algorithm selection path. The shaded area is the null region; the colored lines are each 95% confidence bound that is closer to the null region. Lasso and fully relaxed lasso would select both V2 and V3, while ProSGPV successfully screens out V2.  
 
 ![](man/figures/fig.4.png)
 
 ## Real-world data
 
-Here, we use the Tehran housing data as an illustrative real-world data example of how ProSGPV works with linear regression. For GLM example, please refer to the [vignette](vignettes) folder, particularly this [file](vignettes/glm-vignette.Rmd). 
+Here, we use the Tehran housing data as an illustrative real-world data example of how ProSGPV works with linear regression. 
 
 The Tehran housing data contain 26 explanatory variables and one outcome. Details about data collection can be found in this [paper](https://ascelibrary.org/doi/abs/10.1061/%28ASCE%29CO.1943-7862.0001047), and variable description can be found [here](man/t.housing.Rd). 
 
@@ -115,7 +126,7 @@ predict(out.sgpv.1)
 
 ### Two-stage algorithm 
 
-By default, the two-stage ProSGPV algorithm is applied to gain better parameter estimation and it can also deal with high dimensional data where  <img src="https://latex.codecogs.com/png.latex?\color{white}{p>n}" />.  
+By default, the two-stage ProSGPV algorithm is applied to gain better parameter estimation and it can also deal with high dimensional data where  <img src="https://latex.codecogs.com/png.latex?\color{blue}{p>n}" />.  
 
 ``` r
 out.sgpv.2 <- pro.sgpv(x = x, y = y)
@@ -153,8 +164,12 @@ plot(out.sgpv.2,lpv=1,lambda.max=0.01)
 
 ![](man/figures/fig.3.png)
 
+## More examples
 
-## References
+For GLM examples, please refer to the [vignette](vignettes) folder, particularly this [file](vignettes/glm-vignette.Rmd). 
+
+
+# References
 
 The paper that proposed ProSGPV algorithm in linear regression:  
 

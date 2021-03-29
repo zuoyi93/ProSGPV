@@ -39,3 +39,33 @@
 #' }
 
 "t.housing"
+
+
+#' Spine data
+#'
+#' Lower back pain can be caused by a variety of problems with any parts of the complex,
+#' interconnected network of spinal muscles, nerves, bones, discs or tendons
+#' in the lumbar spine. This dataset contains 12 biomechanical attributes from
+#' 310 patients, of whom 100 are normal and 210 are abnormal (Disk Hernia or
+#' Spondylolisthesis). The goal is to differentiate the normal patients from the
+#' abnormal using those 12 variables.
+#'
+#' @source \url{http://archive.ics.uci.edu/ml/datasets/vertebral+column}
+#' @format
+#' \describe{
+#'  \item{pelvic_incidence}{pelvic incidence}
+#'  \item{pelvic_tilt}{pelvic tilt}
+#'  \item{lumbar_lordosis_angle}{lumbar lordosis angle}
+#'  \item{sacral_slope}{sacral slope}
+#'  \item{pelvic_radius}{pelvic radius}
+#'  \item{degree_spondylolisthesis}{degree of spondylolisthesis}
+#'  \item{pelvic_slope}{pelvic slope}
+#'  \item{direct_tilt}{direct tilt}
+#'  \item{thoracic_slope}{thoracic slope }
+#'  \item{cervical_tilt}{cervical tilt}
+#'  \item{sacrum_angle}{sacrum angle}
+#'  \item{scoliosis_slope}{scoliosis slope}
+#'  \item{outcome}{1 is abnormal (Disk Hernia or Spondylolisthesis) and 0 is normal}
+#' }
+
+"spine"

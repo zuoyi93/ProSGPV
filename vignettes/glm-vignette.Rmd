@@ -3,6 +3,7 @@ title: "ProSGPV in GLM"
 output: 
   rmarkdown::html_vignette:
     toc: yes
+bibliography: assets/refs.bib    
 vignette: >
   %\VignetteIndexEntry{ProSGPV in GLM}
   %\VignetteEngine{knitr::rmarkdown}
@@ -19,12 +20,23 @@ knitr::opts_chunk$set(
 
 # Introduction
 
-`ProSGPV` is a package that performs variable selection with Second-Generation P-Values (SGPV). This document illustrates how `ProSGPV` works with data from generalized linear models (GLM).
+`ProSGPV` is a package that performs variable selection with Second-Generation P-Values (SGPV). This document illustrates how `ProSGPV` works with data from generalized linear models (GLM). 
 
 
 ```{r setup}
 library(ProSGPV)
 ```
 
+# GLM examples
+## Logistic regression
+
+Refer to @kosmidis2021jeffreys for more details on how Jeffreys prior is incorporated in the fitting of logistic regression. 
 
 
+## Poisson regression
+
+## Cox regression
+
+
+
+# References
