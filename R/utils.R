@@ -318,7 +318,7 @@ one.time.size <- function(x, y, family) {
 #' }
 #' @export
 
-which.sgpv <- function(num.sim = 1e3, object) {
+which.sgpv <- function(num.sim = 100, object) {
   if (class(object) != "sgpv") stop("`object` has to be of class `sgpv`.")
 
   if (object$stage == 1) {
@@ -340,8 +340,13 @@ which.sgpv <- function(num.sim = 1e3, object) {
 
     # the most frequent model
     out.1 <- names(sort(table(paste(temp[1, ])), decreasing = T)[1])
-    out.1 <- unlist(regmatches(out.1, gregexpr("\\(?[0-9,.]+", out.1)))
-    out.1 <- as.numeric(gsub("\\(", "", gsub(",", "", out.1)))
+    if(!grepl(":",out.1,fixed=T)){
+      out.1 <- unlist(regmatches(out.1, gregexpr("\\(?[0-9,.]+", out.1)))
+      out.1 <- as.numeric(gsub("\\(", "", gsub(",", "", out.1)))
+    }else{
+      out.1 <- as.numeric(unlist(regmatches(out.1, gregexpr("\\(?[0-9,.]+", out.1))))
+      out.1 <- seq(out.1[1],out.1[2],1)
+    }
 
     # find the random seed to reproduce the result
     i <- 1

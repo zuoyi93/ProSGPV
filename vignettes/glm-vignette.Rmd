@@ -3,7 +3,8 @@ title: "ProSGPV in GLM"
 output: 
   rmarkdown::html_vignette:
     toc: yes
-bibliography: assets/refs.bib    
+bibliography: assets/refs.bib  
+link-citations: yes
 vignette: >
   %\VignetteIndexEntry{ProSGPV in GLM}
   %\VignetteEngine{knitr::rmarkdown}
@@ -20,20 +21,82 @@ knitr::opts_chunk$set(
 
 # Introduction
 
-`ProSGPV` is a package that performs variable selection with Second-Generation P-Values (SGPV). This document illustrates how `ProSGPV` works with data from generalized linear models (GLM). 
+`ProSGPV` is a package that performs variable selection with Second-Generation P-Values (SGPV). This document illustrates how `ProSGPV` works with data from generalized linear models (GLM). Technical details about this algorithm can be found at @zuo2020variable. 
 
+To install the `ProSGPV` pacKakge from CRAN, you can do 
 
-```{r setup}
+```{r,eval=F}
+install("ProSGPV")
+```
+
+Alternatively, you can install a development version of `ProSGPV` by doing 
+
+```{r,eval=F}
+devtools::install_github("zuoyi93/ProSGPV")
+```
+
+Once the package is installed, we can load the package to the current environment.  
+
+```{r}
 library(ProSGPV)
 ```
 
 # GLM examples
 ## Logistic regression
 
-Refer to @kosmidis2021jeffreys for more details on how Jeffreys prior is incorporated in the fitting of logistic regression. 
+Traditionally, maximum likelihood (ML) has been used to fit a Logistic model. However, when sample size is small or effect sizes are strong, complete/quasi-complete separation may happen, which may inflate the parameter estimation bias by a lot [@albert1984existence;@rahman2017performance]. Recently, @kosmidis2021jeffreys proposed to use a Jeffreys prior to address the separation issue in the Logistic regression, and that is implemented in `ProSGPV` package.  
 
+In this section, we will use a real-world data example to showcase how `ProSGPV` performs variable selection when the outcome is binary. Lower back pain can be caused by a variety of problems with any parts of the complex, interconnected network of spinal muscles, nerves, bones, discs or tendons in the lumbar spine. Dr. Henrique da Mota collected 12 biomechanical attributes from 310 patients, of whom 100 are normal and 210 are abnormal (Disk Hernia or Spondylolisthesis). The goal is to differentiate the normal patients from the abnormal using those 12 variables. The biomechanical attributes include pelvic incidence, pelvic tilt, lumbar lordosis angle, sacral slope, pelvic radius, degree of spondylolisthesis, pelvic slope, direct tilt, thoracic slope cervical tilt, sacrum angle, and scoliosis slope. The data set `spine` can be accessed in the `ProSGPV` package.    
+
+```{r}
+x <- spine[,-ncol(spine)]
+y <- spine[,ncol(spine)]
+
+set.seed(1)
+sgpv.2s.l <- pro.sgpv(x,y,family="binomial") 
+
+sgpv.2s.l
+```
+
+`ProSGPV` selects three out of 12 variables and they are acral slope, pelvic radius, and degree of spondylolisthesis. Because of the variability in cross-validated lasso in the first stage of `ProSGPV`, the algorithm may produce slightly different model each time it is run. Our recommendation is to select the model with the highest frequency over multiple runs. `which.spgv` function does this job. The first argument `num.sim` refers to the number of repetitions you'd like to see. Default is 100. To save compilation time, we used 20 here.  
+
+
+```{r, fig.show="hide",warning=FALSE}
+set.seed(1)
+lots.sgpv.l <- which.sgpv(num.sim=20, sgpv.2s.l)
+```
+
+![](assets/glm.fig.1.png){width=80%}
+
+We can also print the `lots.sgpv.l` object.  
+
+```{r}
+lots.sgpv.l
+```
+
+`var.index` returns the most frequently chosen variables; `var.label` returns their variable names; `random.seed` returns the random seed to reproduce the best model; `models` gives a distribution of all the models in the repetitions sorted by frequency.  
+
+We can get a summary of the model that we selected.  
+
+```{r}
+summary(sgpv.2s.l)
+```
+
+Coefficient estimates can be extracted by using the `coef` function.  
+
+```{r}
+coef(sgpv.2s.l)
+```
+
+Prediction in probability can be made by using the `predict` function.
+
+```{r}
+head(predict(sgpv.2s.l))
+```
 
 ## Poisson regression
+
+
 
 ## Cox regression
 

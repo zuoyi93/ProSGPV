@@ -408,28 +408,42 @@ plot.sgpv <- function(x, lpv = 3, lambda.max = NULL, ...) {
     lasso <- glmnet(xs, ys)
 
     # get coefficient estimates at each lambda
-    results <- sapply(lambda.seq, function(z) get.coef(xs = xs, ys = ys, lambda = z, lasso = lasso))
+    if(p < length(x$y)){
+      results <- sapply(lambda.seq, function(z) get.coef(xs = xs, ys = ys, lambda = z, lasso = lasso))
 
-    # prepare data to plot
-    to.plot <- data.frame(
-      lambda = rep(lambda.seq, each = p),
-      v = rep(x.names, length(lambda.seq)),
-      pe = c(results[1:p, ]),
-      lb = c(results[(p + 1):(2 * p), ]),
-      ub = c(results[(2 * p + 1):(3 * p), ])
-    )
+      # prepare data to plot
+      to.plot <- data.frame(
+        lambda = rep(lambda.seq, each = p),
+        v = rep(x.names, length(lambda.seq)),
+        pe = c(results[1:p, ]),
+        lb = c(results[(p + 1):(2 * p), ]),
+        ub = c(results[(2 * p + 1):(3 * p), ])
+      )
+    }else{
+      results <- sapply(lambda.seq[-1], function(z) get.coef(xs = xs, ys = ys, lambda = z, lasso = lasso))
+
+      # prepare data to plot
+      to.plot <- data.frame(
+        lambda = rep(lambda.seq[-1], each = p),
+        v = rep(x.names, length(lambda.seq)-1),
+        pe = c(results[1:p, ]),
+        lb = c(results[(p + 1):(2 * p), ]),
+        ub = c(results[(2 * p + 1):(3 * p), ])
+      )
+    }
+
 
     if (lpv == 1) {
       to.plot$bound <- ifelse(abs(to.plot$lb) < abs(to.plot$ub), to.plot$lb, to.plot$ub)
       plot.d <- to.plot[, c("lambda", "v", "bound")]
 
       # find the location of x.names
-      location.beta <- to.plot$bound[to.plot$lambda == 0]
+      location.beta <- to.plot$bound[to.plot$lambda == to.plot$lambda[1]]
     } else if (lpv == 3) {
       plot.d <- to.plot
 
       # find the location of x.names
-      location.beta <- to.plot$pe[to.plot$lambda == 0]
+      location.beta <- to.plot$pe[to.plot$lambda == to.plot$lambda[1]]
     }
 
     # get the indices of selected variables
@@ -491,7 +505,12 @@ plot.sgpv <- function(x, lpv = 3, lambda.max = NULL, ...) {
       axis(2, at = ytick, labels = c(ytick[1:2], 0, ytick[4:5]))
       mtext(var.axis, side = 2, at = location.beta, col = color.use)
       mtext(bquote(lambda["1se"]), side = 1, at = vlambda)
-      polygon(c(lambda.seq, rev(lambda.seq)), c(-n.bound, rev(n.bound)), col = "grey", border = "grey")
+      # null region
+      if(p<length(x$y)){
+        polygon(c(lambda.seq, rev(lambda.seq)), c(-n.bound, rev(n.bound)), col = "grey", border = "grey")
+      }else{
+        polygon(c(lambda.seq[-1], rev(lambda.seq[-1])), c(-n.bound, rev(n.bound)), col = "grey", border = "grey")
+      }
       invisible(mapply(lines, xvals, yvals, col = 1:p))
       abline(h = 0)
       abline(v = vlambda, lty = 2)
@@ -506,7 +525,11 @@ plot.sgpv <- function(x, lpv = 3, lambda.max = NULL, ...) {
       axis(2, at = ytick, labels = c(ytick[1:2], 0, ytick[4:5]))
 
       # null region
-      polygon(c(lambda.seq, rev(lambda.seq)), c(-n.bound, rev(n.bound)), col = "grey", border = "grey")
+      if(p<length(x$y)){
+        polygon(c(lambda.seq, rev(lambda.seq)), c(-n.bound, rev(n.bound)), col = "grey", border = "grey")
+      }else{
+        polygon(c(lambda.seq[-1], rev(lambda.seq[-1])), c(-n.bound, rev(n.bound)), col = "grey", border = "grey")
+      }
 
       # text on axis
       mtext(var.axis, side = 2, at = location.beta, col = color.use)
