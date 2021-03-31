@@ -86,9 +86,9 @@ get.coef <- function(xs, ys, lambda, lasso, family) {
   p <- ncol(xs)
 
   # evaluate lasso at lambda
-  if(family != "cox"){
+  if (family != "cox") {
     index <- which(coef(lasso, s = lambda)[-1] != 0)
-  }else{
+  } else {
     index <- which(coef(lasso, s = lambda) != 0)
   }
 
@@ -98,34 +98,34 @@ get.coef <- function(xs, ys, lambda, lasso, family) {
   out.ub <- numeric(p)
 
   if (lambda == 0) {
-
-    if(family == "gaussian"){
+    if (family == "gaussian") {
       full.m <- lm(ys ~ xs)
-    }else if (family == "binomial"){
-      full.m <- glm(ys ~ xs, family = "binomial",
-                    method = "brglmFit", type = "MPL_Jeffreys")
-    }else if (family == "poisson"){
+    } else if (family == "binomial") {
+      full.m <- glm(ys ~ xs,
+        family = "binomial",
+        method = "brglmFit", type = "MPL_Jeffreys"
+      )
+    } else if (family == "poisson") {
       full.m <- glm(ys ~ xs, family = "poisson")
-    }else{
+    } else {
       full.m <- coxph(Surv(ys[, 1], ys[, 2]) ~ xs)
     }
 
-    if(family != "cox"){
+    if (family != "cox") {
       pe <- coef(full.m)[-1]
       se <- summary(full.m)$coef[-1, 2]
-    }else{
+    } else {
       pe <- coef(full.m)
       se <- summary(full.m)$coef[, 3]
     }
 
-    if(any(is.na(pe)) ){
+    if (any(is.na(pe))) {
       index.na <- as.numeric(which(is.na(pe)))
       pe[is.na(pe)] <- 0
 
-      for(i in seq_along(index.na)){
-        se <- append(se,F,after= index.na[i] + i -1)
+      for (i in seq_along(index.na)) {
+        se <- append(se, F, after = index.na[i] + i - 1)
       }
-
     }
 
     lb <- pe - 1.96 * se
@@ -135,24 +135,24 @@ get.coef <- function(xs, ys, lambda, lasso, family) {
     out.coef <- as.numeric(pe)
     out.lb <- as.numeric(lb)
     out.ub <- as.numeric(ub)
-
   } else if (length(index) != 0) {
-
-    if(family == "gaussian"){
+    if (family == "gaussian") {
       full.m <- lm(ys ~ xs[, index])
-    }else if (family == "binomial"){
-      full.m <- glm(ys ~ xs[, index], family = "binomial",
-                    method = "brglmFit", type = "MPL_Jeffreys")
-    }else if (family == "poisson"){
+    } else if (family == "binomial") {
+      full.m <- glm(ys ~ xs[, index],
+        family = "binomial",
+        method = "brglmFit", type = "MPL_Jeffreys"
+      )
+    } else if (family == "poisson") {
       full.m <- glm(ys ~ xs[, index], family = "poisson")
-    }else{
+    } else {
       full.m <- coxph(Surv(ys[, 1], ys[, 2]) ~ xs[, index])
     }
 
-    if(family != "cox"){
+    if (family != "cox") {
       pe <- coef(full.m)[-1]
       se <- summary(full.m)$coef[-1, 2]
-    }else{
+    } else {
       pe <- coef(full.m)
       se <- summary(full.m)$coef[, 3]
     }
@@ -164,7 +164,6 @@ get.coef <- function(xs, ys, lambda, lasso, family) {
     out.coef[index] <- as.numeric(pe)
     out.lb[index] <- as.numeric(lb)
     out.ub[index] <- as.numeric(ub)
-
   } else if (length(index) == 0) {
 
     # intercept only model

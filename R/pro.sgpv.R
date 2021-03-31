@@ -384,19 +384,19 @@ predict.sgpv <- function(object, newx, type, ...) {
 #'
 #' # only plot one confidence bound
 #' plot(out.sgpv.2, lpv = 1, lambda.max = 0.01)
-plot.sgpv <- function(x, lpv = 3, lambda.max = NULL, short.label=T, ...) {
+plot.sgpv <- function(x, lpv = 3, lambda.max = NULL, short.label = T, ...) {
   if (!lpv %in% c(1, 3)) stop("lpv argument only takes values of 1 and 3.")
 
   if (length(x$var.index) == 0) {
     message("None of variables are selected.\n")
-    if(x$stage == 2) stop("No visualization is available.\n")
+    if (x$stage == 2) stop("No visualization is available.\n")
   }
 
   # get information from data
   p <- ncol(x$x)
-  if(short.label == T){
-    x.names <- paste("V",1:p,sep="")
-  }else{
+  if (short.label == T) {
+    x.names <- paste("V", 1:p, sep = "")
+  } else {
     x.names <- colnames(x$x)
   }
 
@@ -413,9 +413,9 @@ plot.sgpv <- function(x, lpv = 3, lambda.max = NULL, short.label=T, ...) {
   if (x$stage == 2) {
 
     # maximum lambda in gaussian
-    if (is.null(lambda.max) & x$family=="gaussian"){
+    if (is.null(lambda.max) & x$family == "gaussian") {
       lambda.max <- max(abs(sapply(1:ncol(xs), function(z) xs[, z] %*% ys)) / nrow(xs)) * 1.1
-    }else if (is.null(lambda.max)){
+    } else if (is.null(lambda.max)) {
       lambda.max <- 0.5
     }
 
@@ -426,18 +426,22 @@ plot.sgpv <- function(x, lpv = 3, lambda.max = NULL, short.label=T, ...) {
     lambda.seq <- seq(0, lambda.max, step)
 
     # fit lasso once
-    if(x$family != "cox"){
+    if (x$family != "cox") {
       lasso <- glmnet(xs, ys, family = x$family)
-    }else{
+    } else {
       lasso <- glmnet(xs, Surv(ys[, 1], ys[, 2]), family = x$family)
     }
 
     # get coefficient estimates at each lambda
     if (p < length(x$y)) {
-      results <- sapply(lambda.seq, function(z) get.coef(xs = xs, ys = ys,
-                                                         lambda = z,
-                                                         lasso = lasso,
-                                                         family = x$family))
+      results <- sapply(lambda.seq, function(z) {
+        get.coef(
+          xs = xs, ys = ys,
+          lambda = z,
+          lasso = lasso,
+          family = x$family
+        )
+      })
 
       # prepare data to plot
       to.plot <- data.frame(
@@ -448,10 +452,14 @@ plot.sgpv <- function(x, lpv = 3, lambda.max = NULL, short.label=T, ...) {
         ub = c(results[(2 * p + 1):(3 * p), ])
       )
     } else {
-      results <- sapply(lambda.seq[-1], function(z) get.coef(xs = xs, ys = ys,
-                                                             lambda = z,
-                                                             lasso = lasso,
-                                                             family = x$family))
+      results <- sapply(lambda.seq[-1], function(z) {
+        get.coef(
+          xs = xs, ys = ys,
+          lambda = z,
+          lasso = lasso,
+          family = x$family
+        )
+      })
 
       # prepare data to plot
       to.plot <- data.frame(
