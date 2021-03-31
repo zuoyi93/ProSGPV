@@ -4,7 +4,7 @@
 \alias{plot.sgpv}
 \title{\code{plot.sgpv}: Plot variable selection results}
 \usage{
-\method{plot}{sgpv}(x, lpv = 3, lambda.max = NULL, ...)
+\method{plot}{sgpv}(x, lpv = 3, lambda.max = NULL, short.label = T, ...)
 }
 \arguments{
 \item{x}{An \code{sgpv} object}
@@ -14,6 +14,9 @@ bound that is closest to the null will be plotted, or the value of 3 meaning tha
 point estimates as well as 95\% confidence interval will be plotted. Default is 3.}
 
 \item{lambda.max}{The maximum lambda on the plot. Default is \code{NULL}.}
+
+\item{short.label}{An indicator if a short label is used for each variable for
+better visualization. Default is \code{TRUE}}
 
 \item{...}{Other \code{plot} arguments}
 }

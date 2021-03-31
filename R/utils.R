@@ -26,6 +26,7 @@ get.var <- function(candidate.index, xs, ys, family) {
     out.sgpv <- integer(0)
     null.bound.p <- NULL
     pe <- NULL
+    se <- NULL
     lb <- NULL
     ub <- NULL
   } else {
@@ -70,6 +71,7 @@ get.var <- function(candidate.index, xs, ys, family) {
 #' Get the coefficients and confidence intervals from regression at each \code{lambda}
 #' as well as the null bound in SGPVs
 #' @importFrom glmnet glmnet
+#' @importFrom survival coxph Surv
 #' @param xs Standardized design matrix
 #' @param ys Standardized outcome
 #' @param lambda \code{lambda} in the lasso
@@ -84,7 +86,11 @@ get.coef <- function(xs, ys, lambda, lasso, family) {
   p <- ncol(xs)
 
   # evaluate lasso at lambda
-  index <- which(coef(lasso, s = lambda)[-1] != 0)
+  if(family != "cox"){
+    index <- which(coef(lasso, s = lambda)[-1] != 0)
+  }else{
+    index <- which(coef(lasso, s = lambda) != 0)
+  }
 
   # define the output
   out.coef <- numeric(p)
@@ -93,35 +99,72 @@ get.coef <- function(xs, ys, lambda, lasso, family) {
 
   if (lambda == 0) {
 
-    # full ols model
-    full.ols <- lm(ys ~ xs)
+    if(family == "gaussian"){
+      full.m <- lm(ys ~ xs)
+    }else if (family == "binomial"){
+      full.m <- glm(ys ~ xs, family = "binomial",
+                    method = "brglmFit", type = "MPL_Jeffreys")
+    }else if (family == "poisson"){
+      full.m <- glm(ys ~ xs, family = "poisson")
+    }else{
+      full.m <- coxph(Surv(ys[, 1], ys[, 2]) ~ xs)
+    }
 
-    pe <- summary(full.ols)$coef[-1, 1]
-    se <- summary(full.ols)$coef[-1, 2]
+    if(family != "cox"){
+      pe <- coef(full.m)[-1]
+      se <- summary(full.m)$coef[-1, 2]
+    }else{
+      pe <- coef(full.m)
+      se <- summary(full.m)$coef[, 3]
+    }
+
+    if(any(is.na(pe)) ){
+      index.na <- as.numeric(which(is.na(pe)))
+      pe[is.na(pe)] <- 0
+
+      for(i in seq_along(index.na)){
+        se <- append(se,F,after= index.na[i] + i -1)
+      }
+
+    }
+
     lb <- pe - 1.96 * se
     ub <- pe + 1.96 * se
 
-    null.bound.lasso <- mean(summary(full.ols)$coef[-1, 2])
-
+    null.bound.lasso <- mean(se)
     out.coef <- as.numeric(pe)
     out.lb <- as.numeric(lb)
     out.ub <- as.numeric(ub)
+
   } else if (length(index) != 0) {
 
-    # run fully relaxed LASSO
-    f.l <- lm(ys ~ xs[, index])
+    if(family == "gaussian"){
+      full.m <- lm(ys ~ xs[, index])
+    }else if (family == "binomial"){
+      full.m <- glm(ys ~ xs[, index], family = "binomial",
+                    method = "brglmFit", type = "MPL_Jeffreys")
+    }else if (family == "poisson"){
+      full.m <- glm(ys ~ xs[, index], family = "poisson")
+    }else{
+      full.m <- coxph(Surv(ys[, 1], ys[, 2]) ~ xs[, index])
+    }
 
-    # get confidence bands
-    pe <- summary(f.l)$coef[-1, 1]
-    se <- summary(f.l)$coef[-1, 2]
+    if(family != "cox"){
+      pe <- coef(full.m)[-1]
+      se <- summary(full.m)$coef[-1, 2]
+    }else{
+      pe <- coef(full.m)
+      se <- summary(full.m)$coef[, 3]
+    }
+
     lb <- pe - 1.96 * se
     ub <- pe + 1.96 * se
 
-    null.bound.lasso <- mean(summary(f.l)$coef[-1, 2])
-
+    null.bound.lasso <- mean(se)
     out.coef[index] <- as.numeric(pe)
     out.lb[index] <- as.numeric(lb)
     out.ub[index] <- as.numeric(ub)
+
   } else if (length(index) == 0) {
 
     # intercept only model
@@ -306,8 +349,8 @@ one.time.size <- function(x, y, family) {
 #'
 #' @importFrom stats density
 #'
-#' @param num.sim Number of repetitions. Default is 1000
 #' @param object An \code{sgpv} object
+#' @param num.sim Number of repetitions. Default is 1000
 #'
 #' @return A list of following components:
 #' \describe{
@@ -318,7 +361,7 @@ one.time.size <- function(x, y, family) {
 #' }
 #' @export
 
-which.sgpv <- function(num.sim = 100, object) {
+which.sgpv <- function(object, num.sim = 100) {
   if (class(object) != "sgpv") stop("`object` has to be of class `sgpv`.")
 
   if (object$stage == 1) {
@@ -340,12 +383,12 @@ which.sgpv <- function(num.sim = 100, object) {
 
     # the most frequent model
     out.1 <- names(sort(table(paste(temp[1, ])), decreasing = T)[1])
-    if(!grepl(":",out.1,fixed=T)){
+    if (!grepl(":", out.1, fixed = T)) {
       out.1 <- unlist(regmatches(out.1, gregexpr("\\(?[0-9,.]+", out.1)))
       out.1 <- as.numeric(gsub("\\(", "", gsub(",", "", out.1)))
-    }else{
+    } else {
       out.1 <- as.numeric(unlist(regmatches(out.1, gregexpr("\\(?[0-9,.]+", out.1))))
-      out.1 <- seq(out.1[1],out.1[2],1)
+      out.1 <- seq(out.1[1], out.1[2], 1)
     }
 
     # find the random seed to reproduce the result

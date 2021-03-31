@@ -5,10 +5,10 @@ Penalized Regression with Second-Generation P-Values
 - [1. Introduction](#1-introduction)
 - [2. Installation](#2-installation)
 - [3. Example](#3-example)
-  * [3.1 Simulation-data](#31-simulation-data)
+  * [3.1 How ProSGPV works](#31-how-prosgpv-works)
   * [3.2 Real-world-data](#32-real-world-data)
-    + [3.2.1 One-stage-algorithm](#321-one-stage-algorithm)
-    + [3.2.2 Two-stage-algorithm](#322-two-stage-algorithm)
+    + [3.2.1 Two-stage-algorithm](#321-two-stage-algorithm)
+    + [3.2.2 One-stage-algorithm](#322-one-stage-algorithm)
   * [3.3 More-examples](#33-more-examples)
 - [4. References](#4-references)
 
@@ -35,7 +35,7 @@ devtools::install_github("zuoyi93/ProSGPV")
 
 # 3. Example
 
-## 3.1 Simulation data 
+## 3.1 How ProSGPV works
 
 Below is an illustration of how ProSGPV successfully selects the true support, while lasso and fully relaxed lasso fails. Five variables are simulated and only V3 is associated with the response. Plot (1) presents the lasso solution path. The vertical dotted line is <img src="https://latex.codecogs.com/png.latex?\color{blue}{\lambda_{\text{1se}}}" /> . (2) shows the fully relaxed lasso path. (3) shows the fully relaxed lasso paths with their 95% confidence intervals (in lighter color). (4) illustrates the two-stage ProSGPV algorithm selection path. The shaded area is the null region; the colored lines are each 95% confidence bound that is closer to the null region. Lasso and fully relaxed lasso would select both V2 and V3, while ProSGPV successfully screens out V2.  
 
@@ -47,10 +47,9 @@ Here, we use the Tehran housing data as an illustrative real-world data example 
 
 The Tehran housing data contain 26 explanatory variables and one outcome. Details about data collection can be found in this [paper](https://ascelibrary.org/doi/abs/10.1061/%28ASCE%29CO.1943-7862.0001047), and variable description can be found [here](man/t.housing.Rd). 
 
+### 3.2.1 Two-stage algorithm 
 
-### 3.2.1 One-stage algorithm
-
-First, let's see the variable selection results using the fast one-stage ProSGPV algorithm.
+We can load the Tehran Housing data `t.housing` stored in the package.
 
 ``` r
 # load the package
@@ -60,6 +59,135 @@ library(ProSGPV)
 x = t.housing[,-ncol(t.housing)]
 y = t.housing$V9
 
+set.seed(1)
+
+# run ProSGPV
+out.sgpv.2 <- pro.sgpv(x = x, y = y)
+```
+The two-stage algorithm selects the following variables.
+
+``` r
+out.sgpv.2
+```
+
+    #> Selected variables are V8 V12 V13 V15 V17 V26
+
+We can view the summary of the final model.
+
+```r
+summary(out.sgpv.2)
+```
+	#> 
+	#> Call:
+	#> lm(formula = Response ~ ., data = data.d)
+	#> 
+	#> Residuals:
+	#>      Min       1Q   Median       3Q      Max 
+	#> -1276.35   -75.59    -9.58    59.46  1426.22 
+	#> 
+	#> Coefficients:
+	#>               Estimate Std. Error t value Pr(>|t|)    
+	#> (Intercept)  1.708e+02  3.471e+01   4.920 1.31e-06 ***
+	#> V8           1.211e+00  1.326e-02  91.277  < 2e-16 ***
+	#> V12         -2.737e+01  2.470e+00 -11.079  < 2e-16 ***
+	#> V13          2.185e+01  2.105e+00  10.381  < 2e-16 ***
+	#> V15          2.041e-03  1.484e-04  13.756  < 2e-16 ***
+	#> V17         -3.459e+00  8.795e-01  -3.934  0.00010 ***
+	#> V26         -4.683e+00  1.780e+00  -2.630  0.00889 ** 
+	#> ---
+	#> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+	#> 
+	#> Residual standard error: 194.8 on 365 degrees of freedom
+	#> Multiple R-squared:  0.9743, Adjusted R-squared:  0.9739 
+	#> F-statistic:  2310 on 6 and 365 DF,  p-value: < 2.2e-16
+
+
+Coefficient estimates can be extracted by use of `coef`.
+
+```r
+coef(out.sgpv.2s)
+```
+
+	#>  [1]   0.000000000   0.000000000   0.000000000   0.000000000   0.000000000
+	#>  [6]   0.000000000   1.210755031   0.000000000 -27.367601037  21.853920174
+	#> [11]   0.000000000   0.002040784   0.000000000  -3.459496972   0.000000000
+	#> [16]   0.000000000   0.000000000   0.000000000   0.000000000   0.000000000
+	#> [21]   0.000000000   0.000000000  -4.683172725   0.000000000   0.000000000
+	#> [26]   0.000000000
+
+In-sample prediction can be made using S3 method `predict` and an external sample can be provided to make out-of-sample prediction with an argument of `newx` in the predict function.
+
+```r
+head(predict(out.sgpv.2s))
+```
+
+	#>         1         2         3         4         5         6 
+	#> 1565.7505 3573.7793  741.7576  212.1297 5966.1682 5724.0172
+
+
+Because of variability in cross-validated lasso in the first stage of `ProSGPV`, the algorithm may produces slightly different models. Our recommendation is to run the algorithm several times and use the most frequent one. `which.spgv` function facilitates this process. By default, 100 repetitions are conducted. You will first see a density plot that presents the distribution of the model size over repetitions. 
+
+```r
+lots.sgpv <- which.sgpv(num.sim = 20, out.sgpv.2s)
+```
+
+![](vignettes/assets/linear.fig.3.png)
+
+We can also print `lots.sgpv`.  
+
+```r
+lots.sgpv
+```
+	#> $var.index
+	#> [1]  7  9 10 12 14 23
+	#> 
+	#> $var.label
+	#> [1] "V8"  "V12" "V13" "V15" "V17" "V26"
+	#> 
+	#> $random.seed
+	#> [1] 1
+	#> 
+	#> $models
+	#> 
+	#>   c(7, 9, 10, 12, 14, 23) c(4, 6, 7, 8, 14, 24, 26)     c(4, 6, 7, 8, 14, 26) 
+	#>                        10                         3                         2 
+	#>    c(6, 7, 8, 13, 16, 25)   c(7, 8, 10, 12, 14, 23)    c(6, 7, 8, 10, 14, 23) 
+	#>                         2                         2                         1
+
+There are four objects that `which.spgv` returns. `var.index` returns the indices of variables in the most frequent model; `var.label` returns labels of those variables; `random.seed` returns the random seed that would reproduce the most frequent model. We can check by
+
+```r
+set.seed(1)
+pro.sgpv(x,y)
+```
+
+	#> Selected variables are V8 V12 V13 V15 V17 V26
+
+Lastly, `models` sorts all models that appear in the repetitions by frequency.
+
+Once we are certain about the final model, S3 method `plot` can be used to visualize the variable selection process.
+
+``` r
+plot(out.sgpv.2, lambda.max = 0.01)
+```
+First, we plot the full solution path with point estimates and 95% confidence intervals. Note that the null region is in grey. The selected variables are colored blue on the y-axis. `lambda.max` controls the limit of the X-axis.  
+
+![](vignettes/assets/linear.fig.1.png)
+
+Alternatively, we can plot the confidence bound that is closer to the null.
+
+``` r
+plot(out.sgpv.2,lpv=1,lambda.max=0.01)
+```
+
+![](vignettes/assets/linear.fig.2.png)
+
+
+### 3.2.2 One-stage algorithm
+
+A fast one-stage ProSGPV algorithm is also available when <img src="https://latex.codecogs.com/png.latex?\color{blue}{n>p}" />.
+
+``` r
 # run one-stage algorithm
 out.sgpv.1 <- pro.sgpv(x = x, y = y, stage = 1)
 ```
@@ -70,103 +198,24 @@ The selected variables are
 out.sgpv.1
 ```
 
-    ## Selected variables are V8 V12 V13 V15 V17 V25 V26
+    #> Selected variables are V8 V12 V13 V15 V17 V25 V26
 
-We can also extract indices of variables selected
+`coef`, `summary`, and `predict` methods are also applicable here.
 
-``` r
-out.sgpv.1$var.index
-```
-
-    ## [1]  7  9 10 12 14 22 23
-
-
-Now let's view the summary of the OLS model on those selected variables. 
+Moreover, `plot` function can be used to visualize the variable selection process for the one-stage algorithm.
 
 ``` r
-summary(out.sgpv.1)
+plot(out.sgpv.1)
 ```
 
-	## Call:
-	## lm(formula = Response ~ ., data = lm.d)
-	##
-	## Residuals:
-	##     Min       1Q   Median       3Q      Max 
-	## -1226.05   -69.43    -7.74    53.65  1431.54 
-	##
-	## Coefficients:
-	##               Estimate Std. Error t value Pr(>|t|)    
-	## (Intercept)  7.745e+01  5.775e+01   1.341 0.180694    
-	## V8           1.209e+00  1.323e-02  91.416  < 2e-16 ***
-	## V12         -2.552e+01  2.624e+00  -9.725  < 2e-16 ***
-	## V13          1.899e+01  2.532e+00   7.497 5.01e-13 ***
-	## V15          2.033e-03  1.478e-04  13.759  < 2e-16 ***
-	## V17         -3.289e+00  8.799e-01  -3.738 0.000216 ***
-	## V25          1.135e+01  5.626e+00   2.018 0.044327 *  
-	## V26         -1.436e+01  5.112e+00  -2.809 0.005240 ** 
-	## ---
-	## Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
-	## 
-	## Residual standard error: 194 on 364 degrees of freedom
-	## Multiple R-squared:  0.9746,	Adjusted R-squared:  0.9741 
-	## F-statistic:  1997 on 7 and 364 DF,  p-value: < 2.2e-16
+![](vignettes/assets/linear.fig.4.png)
 
+However, it is recommended to use the two-stage algorithm rather than the one-stage algorithm for better support recovery and parameter estimation. More importantly, only the two-stage algorithm is available for high dimensional data where <img src="https://latex.codecogs.com/png.latex?\color{blue}{p>n}" />.
 
-We can extract the point estimates by  
-
-``` r
-coef(out.sgpv.1)
-```
-
-We can get the predicted values by
-
-``` r
-predict(out.sgpv.1)
-```
-
-### 3.2.2 Two-stage algorithm 
-
-By default, the two-stage ProSGPV algorithm is applied to gain better parameter estimation and it can also deal with high dimensional data where  <img src="https://latex.codecogs.com/png.latex?\color{blue}{p>n}" />.  
-
-``` r
-out.sgpv.2 <- pro.sgpv(x = x, y = y)
-```
-The two-stage algorithm selects the following variables.
-
-``` r
-out.sgpv.2
-```
-
-    ## Selected variables are V8 V12 V13 V15 V17 V26
-
-S3 method `plot` is available for the two-stage algorithm.
-
-``` r
-plot(out.sgpv.2)
-```
-First, we plot the full solution path with point estimates and 95% confidence intervals. Note that the null region is in sky blue. The selected variables are colored blue on the y-axis.
-
-![](man/figures/fig.1.png)
-
-We can also zoom in to have a closer look.  
-
-``` r
-plot(out.sgpv.2,lambda.max=0.01)
-```
-
-![](man/figures/fig.2.png)
-
-Alternatively, we can plot the confidence bound that is closer to the null.
-
-``` r
-plot(out.sgpv.2,lpv=1,lambda.max=0.01)
-```
-
-![](man/figures/fig.3.png)
 
 ## 3.3 More examples
 
-For GLM examples, please refer to the [vignette](vignettes) folder, particularly this [file](vignettes/glm-vignette.Rmd). 
+For [high-dimensional continuous data examples](vignettes/linear-vignette.Rmd) and [GLM examples](vignettes/glm-vignette.Rmd), please refer to the [vignette](vignettes) folder.  
 
 
 # 4. References

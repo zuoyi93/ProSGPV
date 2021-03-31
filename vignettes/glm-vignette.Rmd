@@ -21,7 +21,9 @@ knitr::opts_chunk$set(
 
 # Introduction
 
-`ProSGPV` is a package that performs variable selection with Second-Generation P-Values (SGPV). This document illustrates how `ProSGPV` works with data from generalized linear models (GLM). Technical details about this algorithm can be found at @zuo2020variable. 
+`ProSGPV` is a package that performs variable selection with Second-Generation P-Values (SGPV). This document illustrates how `ProSGPV` performs variable selection with data from generalized linear models (GLM). Technical details about this algorithm can be found at @zuo2020variable. 
+
+We will use Logistic regression to illustrate how `ProSGPV` selects variables with a low-dimensional ($n>p$) real-world data example and how to choose models when each run gives you slightly different results. We will use Poisson regression to show how `ProSGPV` works with simulated high-dimensional Poisson data and a visualization tool for the selection process. We will use Cox proportional hazards model to show how a fast one-stage algorithm works with simulated data together with a visualization tool for the one-stage `ProSGPV`.     
 
 To install the `ProSGPV` pacKakge from CRAN, you can do 
 
@@ -96,10 +98,118 @@ head(predict(sgpv.2s.l))
 
 ## Poisson regression
 
+`gen.sim.data` function is used to generate some high-dimensional ($p>n$) simulation data from Poisson distribution in this section. There are many arguments in the `gen.sim.data` function, as it can generate data with continuous, binary, count, and survival outcomes.  
+`n` is the number of observations, `p` is the number of variables, `s` is the number of true signals, `family` can take the value of `"gaussian"`, `"binomial"`, `"poisson"`, and `"cox"`, `beta.min` is the smallest effect size in absolute value, `beta.max` is the largest effect size, `rho` is the autocorrelation coefficient in the design matrix, `nu` is the signal-to-noise ratio in the continuous outcome case, `sig` is the standard deviation in the covariance matrix of the design matrix, `intercept` is used in the linear mean vector of GLM, `scale` and `shape` are parameters in Weibull survival time, and `rateC` is the rate of censoring.  
 
+In this section, we simulate 80 observations with 100 explanatory variables and one count outcome. The number of true signals is four. The smallest log rate ratio is 0.5 and the largest log rate ratio is 1.5. When $p>n$, only the two-stage `ProSGPV` will be used, even if `stage` is set to be 1. 
+
+
+```{r}
+set.seed(1)
+data.log <- gen.sim.data(n=80,p=100,s=4,beta.min=0.5,beta.max=1.5,family="poisson")
+
+x <- data.log[[1]]
+y <- data.log[[2]]
+(true.index <- data.log[[3]])
+(true.beta <- data.log[[4]])
+
+sgpv.2s.p <- pro.sgpv(x,y,family="poisson")
+sgpv.2s.p
+```
+
+We see that the two-stage `ProSGPV` recovered the true support. Like before, you can use the `which.sgpv` function to confirm this is the most frequent model to use. (results not shown)   
+
+```{r,eval=F}
+which.sgpv(sgpv.2s.p)
+```
+
+Summary of the final model is available by calling `summary`. 
+
+```{r}
+summary(sgpv.2s.p)
+```
+
+Coefficients can be extracted by `coef`. We see the estimates are pretty close to the truth.  
+
+```{r}
+coef(sgpv.2s.p)
+```
+
+In-sample prediction can be done as follows.
+
+```{r}
+head(predict(sgpv.2s.p))
+```
+
+Out-of-sample prediction is also available by feeding data into the `newx` argument.  
+
+```{r}
+set.seed(1)
+data.log <- gen.sim.data(n=10,p=100,s=4,beta.min=0.5,beta.max=1.5,family="poisson")
+
+x.new <- data.log[[1]]
+y.new <- data.log[[2]]
+
+data.frame(Observed=y.new,Predicted=predict(sgpv.2s.p,newx=x.new))
+
+```
+
+The prediction agrees with the truth well.  
+
+The selection process can be visualized below. `lambda.max` sets the limit of X-axis. Only effects whose lower bound doesn't reach the null regions are kept. Selected variables are labeled blue on the Y-axis.
+
+```{r,eval=F}
+plot(sgpv.2s.p,lambda.max = 0.6)
+```
+
+![](assets/glm.fig.2.png){width=80%}
+
+You can also chooses to view only one line per variable by setting `lpv` to be 1. That line is the 95\% confidence bound that is closer to the null.  
+
+```{r,eval=F}
+plot(sgpv.2s.p,lambda.max = 0.6,lpv=1)
+```
+
+![](assets/glm.fig.3.png){width=80%}
 
 ## Cox regression
 
+In this section, we will use simulated low-dimensional survival data to illustrate how one-stage and two-stage `ProSGPV` select variables, and additional visualization for the one-stage algorithm's selection process.  
 
+`gen.sim.data` is used to simulate 100 observations.   
+
+```{r}
+set.seed(1)
+data.cox <- gen.sim.data(n=100, p=20, s=4, family="cox", 
+                         beta.min=0.5, beta.max=1.5, sig=2)
+
+x <- data.cox[[1]]
+y <- data.cox[[2]]
+(true.index <- data.cox[[3]])
+true.beta <- data.cox[[4]]
+
+sgpv.2s.c <- pro.sgpv(x,y,stage=2,family="cox")
+sgpv.2s.c
+```
+
+The two-stage algorithm successfully recovered the true support. We can also run a fast one-stage algorithm by setting`stage` to be 1.  
+
+```{r}
+sgpv.1s.c <- pro.sgpv(x,y,stage=1,family="cox")
+sgpv.1s.c
+```
+
+It succeeded as well. `summary`, `coef`, and `predict` are also available for the one-stage `ProSGPV` object.  
+ 
+We can visualize the one-stage selection process by calling the `plot` function.   
+
+```{r,eval=F}
+plot(sgpv.1s.c)
+```
+
+
+Effects estimates (in this case log hazards ratios) and corresponding 95\% confidence intervals are plotted for each variable in the full Cox model. Two vertical green bars indicate the null region. Only effects whose confidence bounds do not overlap with the null regions are kept. Selected variables are colored in blue.  
+
+![](assets/glm.fig.4.png){width=80%}
 
 # References

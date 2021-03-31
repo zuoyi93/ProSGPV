@@ -4,12 +4,12 @@
 \alias{which.sgpv}
 \title{which.sgpv: Find the most frequent model selected by the two-stage ProSGPV}
 \usage{
-which.sgpv(num.sim = 100, object)
+which.sgpv(object, num.sim = 100)
 }
 \arguments{
-\item{num.sim}{Number of repetitions. Default is 1000}
-
 \item{object}{An \code{sgpv} object}
+
+\item{num.sim}{Number of repetitions. Default is 1000}
 }
 \value{
 A list of following components:
