@@ -133,7 +133,7 @@ sgpv.1s
 
 Note that the one-stage algorithm selects one more variable than the two-stage algorithm.
 
-S3 methods `summary`, `coef`, `predict` and `plot` are available for the one-stage algorithm. Particularly, `plot(sgpv.1s)` would presents the variable selection results in the full model. Point estimates and 95\% confidence intervals are shown for each variable, and the null bound is shown in green vertical bars. Selected variables are colored in blue.  
+S3 methods `summary`, `coef`, `predict` and `plot` are available for the one-stage algorithm. Particularly, `plot(sgpv.1s)` would presents the variable selection results in the full model. Point estimates and 95\% confidence intervals are shown for each variable, and the null bounds are shown in green vertical bars. Selected variables are colored in blue.  
 
 ```{r,eval=F}
 plot(sgpv.1s)

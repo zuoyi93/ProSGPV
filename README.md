@@ -202,7 +202,7 @@ out.sgpv.1
 
 `coef`, `summary`, and `predict` methods are also applicable here.
 
-Moreover, `plot` function can be used to visualize the variable selection process for the one-stage algorithm.
+Moreover, `plot` function can be used to visualize the variable selection process for the one-stage algorithm. Point estimates and 95% confidence intervals are shown for each variable, and the null bounds are shown in green vertical bars. Selected variables are colored in blue.
 
 ``` r
 plot(out.sgpv.1)
