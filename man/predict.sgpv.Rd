@@ -4,12 +4,12 @@
 \alias{predict.sgpv}
 \title{\code{predict.sgpv}: Prediction using the fitted model}
 \usage{
-\method{predict}{sgpv}(object, newx, type, ...)
+\method{predict}{sgpv}(object, newdata, type, ...)
 }
 \arguments{
 \item{object}{An \code{sgpv} objectect}
 
-\item{newx}{Prediction data set}
+\item{newdata}{Prediction data set}
 
 \item{type}{The type of prediction required. Can take the value of \code{link},
 \code{response}, and \code{terms}. Default is \code{response}.}

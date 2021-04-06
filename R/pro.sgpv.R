@@ -275,7 +275,7 @@ summary.sgpv <- function(object, ...) {
 #' @importFrom brglm2 brglmFit
 #'
 #' @param object An \code{sgpv} objectect
-#' @param newx Prediction data set
+#' @param newdata Prediction data set
 #' @param type The type of prediction required. Can take the value of `link`,
 #' `response`, and `terms`. Default is `response`.
 #' @param ... Other \code{predict} arguments
@@ -293,38 +293,40 @@ summary.sgpv <- function(object, ...) {
 #' out.sgpv <- pro.sgpv(x = x, y = y)
 #'
 #' predict(out.sgpv)
-predict.sgpv <- function(object, newx, type, ...) {
+predict.sgpv <- function(object, newdata, type, ...) {
   if (object$family == "cox") stop("Sorry, prediction method isn't available for Cox models yet.\n")
 
   if (length(object$var.index) > 0) {
     data.d <- data.frame(Response = object$y, xx = object$x[, object$var.index])
     colnames(data.d)[-1] <- object$var.label
 
-    if (missing(newx)) newx <- object$x
-    if (is.null(colnames(newx))) colnames(newx) <- paste("V", 1:ncol(newx), sep = "")
+    if (missing(newdata)) newdata <- object$x
+    if (is.null(colnames(newdata))) colnames(newdata) <- paste("V", 1:ncol(newdata), sep = "")
     if (missing(type)) type <- "response"
 
     if (object$family == "gaussian") {
       lm.m <- lm(Response ~ ., data = data.d)
-      predict(lm.m, data.frame(newx))
+      predict(lm.m, data.frame(newdata))
     } else if (object$family == "poisson") {
       glm.m <- glm(Response ~ ., family = "poisson", data = data.d)
-      predict(glm.m, data.frame(newx), type = type)
+      predict(glm.m, data.frame(newdata), type = type)
     } else {
       glm.m <- glm(Response ~ .,
         family = "binomial", data = data.d,
         method = "brglmFit", type = "MPL_Jeffreys"
       )
-      predict(glm.m, data.frame(newx), type = type)
+      predict(glm.m, data.frame(newdata), type = type)
     }
   } else {
     message("None of variables are selected.")
     message("Therefore, the prediction is based on the intercept only model.\n")
 
+    if (missing(newdata)) newdata <- object$x
+
     if (object$family == "gaussian") {
       data.d <- data.frame(yy = object$y)
       lm.m <- lm(yy ~ 1, data = data.d)
-      predict(lm.m)
+      predict(lm.m, data.frame(newdata))
     } else {
       glm.m <- glm(yy ~ 1,
         data = data.frame(
@@ -334,7 +336,7 @@ predict.sgpv <- function(object, newx, type, ...) {
         family = object$family
       )
 
-      predict(glm.m, type = "response")
+      predict(glm.m, newdata = data.frame(newdata), type = "response")
     }
   }
 }

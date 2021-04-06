@@ -141,7 +141,7 @@ In-sample prediction can be done as follows.
 head(predict(sgpv.2s.p))
 ```
 
-Out-of-sample prediction is also available by feeding data into the `newx` argument.  
+Out-of-sample prediction is also available by feeding data into the `newdata` argument.  
 
 ```{r}
 set.seed(1)
@@ -150,7 +150,7 @@ data.log <- gen.sim.data(n=10,p=100,s=4,beta.min=0.5,beta.max=1.5,family="poisso
 x.new <- data.log[[1]]
 y.new <- data.log[[2]]
 
-data.frame(Observed=y.new,Predicted=predict(sgpv.2s.p,newx=x.new))
+data.frame(Observed=y.new,Predicted=predict(sgpv.2s.p,newdata=x.new))
 
 ```
 

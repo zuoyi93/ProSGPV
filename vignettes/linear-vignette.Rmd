@@ -78,7 +78,7 @@ Coefficient estimates can be extracted by use of S3 method `coef`. Note that it 
 coef(sgpv.2s)
 ```
 
-In-sample prediction can be made using S3 method `predict` and an external sample can be provided to make out-of-sample prediction with an argument of `newx` in the `predict` function.
+In-sample prediction can be made using S3 method `predict` and an external sample can be provided to make out-of-sample prediction with an argument of `newdata` in the `predict` function.
 
 ```{r}
 head(predict(sgpv.2s))
