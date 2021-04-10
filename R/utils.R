@@ -394,7 +394,7 @@ which.sgpv <- function(object, num.sim = 100) {
     i <- 1
     while (T) {
       set.seed(i)
-      if( length(out.1) == 1 & (0 %in% out.1) ){
+      if( 0 %in% out.1 ){
         if( (length(pro.sgpv(object$x, object$y,
                     family = object$family)$var.index) == 0) & (out.1 == 0) ) break
       }else{
