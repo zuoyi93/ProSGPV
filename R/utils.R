@@ -60,7 +60,7 @@ get.var <- function(candidate.index, xs, ys, family) {
       name.drop <- setdiff(names(pe), names(se))
       pe <- pe[!names(pe) %in% name.drop]
       se <- se[!names(se) %in% name.drop]
-      candidate.index <- candidate.index[!names(candidate.index) %in% name.drop]
+      candidate.index <- candidate.index[!is.na(pe)]
 
       null.bound.p <- mean(se)
 
