@@ -50,10 +50,25 @@ get.var <- function(candidate.index, xs, ys, family) {
       se <- summary(cox.m)$coef[, 3]
     }
 
-    null.bound.p <- mean(se)
+    if(length(pe) == length(se)){
+      null.bound.p <- mean(se)
 
-    # screen variables
-    out.sgpv <- candidate.index[which(abs(pe) > 1.96 * se + null.bound.p)]
+      # screen variables
+      out.sgpv <- candidate.index[which(abs(pe) > 1.96 * se + null.bound.p)]
+    }else{
+
+      name.drop <- setdiff(names(pe), names(se))
+      pe <- pe[!names(pe) %in% name.drop]
+      se <- se[!names(se) %in% name.drop]
+      candidate.index <- candidate.index[!names(candidate.index) %in% name.drop]
+
+      null.bound.p <- mean(se)
+
+      # screen variables
+      out.sgpv <- candidate.index[which(abs(pe) > 1.96 * se + null.bound.p)]
+
+    }
+
   }
 
   return(list(
