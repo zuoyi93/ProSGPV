@@ -1,6 +1,6 @@
 Package: ProSGPV
 Title: Penalized Regression with Second-Generation P-Values
-Version: 0.2.0
+Version: 0.3.0
 Authors@R: 
     c(person(given = "Yi",
            family = "Zuo",

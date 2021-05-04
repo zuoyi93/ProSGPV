@@ -29,7 +29,7 @@ A list of following components:
 \describe{
 \item{var.index}{A vector of indices of selected variables}
 \item{var.label}{A vector of labels of selected variables}
-\item{lambda}{Cross-validated lambda in the two-stage algorithm. \code{NULL} for the one-stage algorithm}
+\item{lambda}{\code{lambda} selected by generalized information criterion in the two-stage algorithm. \code{NULL} for the one-stage algorithm}
 \item{x}{Input data \code{x}}
 \item{y}{Input data \code{y}}
 \item{family}{\code{family} from the input}

@@ -54,29 +54,12 @@ In this section, we will use a real-world data example to showcase how `ProSGPV`
 x <- spine[,-ncol(spine)]
 y <- spine[,ncol(spine)]
 
-set.seed(1)
 sgpv.2s.l <- pro.sgpv(x,y,family="binomial") 
 
 sgpv.2s.l
 ```
 
-`ProSGPV` selects three out of 12 variables and they are acral slope, pelvic radius, and degree of spondylolisthesis. Because of the variability in cross-validated lasso in the first stage of `ProSGPV`, the algorithm may produce slightly different model each time it is run. Our recommendation is to select the model with the highest frequency over multiple runs. `which.spgv` function does this job. The first argument `num.sim` refers to the number of repetitions you'd like to see. Default is 100. To save compilation time, we used 20 here.  
-
-
-```{r, fig.show="hide",warning=FALSE}
-set.seed(1)
-lots.sgpv.l <- which.sgpv(num.sim=20, sgpv.2s.l)
-```
-
-![](assets/glm.fig.1.png){width=80%}
-
-We can also print the `lots.sgpv.l` object.  
-
-```{r}
-lots.sgpv.l
-```
-
-`var.index` returns the most frequently chosen variables; `var.label` returns their variable names; `random.seed` returns the random seed to reproduce the best model; `models` gives a distribution of all the models in the repetitions sorted by frequency.  
+`ProSGPV` selects three out of 12 variables and they are acral slope, pelvic radius, and degree of spondylolisthesis. 
 
 We can get a summary of the model that we selected.  
 
@@ -117,13 +100,9 @@ sgpv.2s.p <- pro.sgpv(x,y,family="poisson")
 sgpv.2s.p
 ```
 
-We see that the two-stage `ProSGPV` recovered the true support. Like before, you can use the `which.sgpv` function to confirm this is the most frequent model to use. (results not shown)   
+We see that the two-stage `ProSGPV` recovered the true support. 
 
-```{r,eval=F}
-which.sgpv(sgpv.2s.p)
-```
-
-Summary of the final model is available by calling `summary`. 
+Similarly, the summary of the final model is available by calling `summary`. 
 
 ```{r}
 summary(sgpv.2s.p)
@@ -156,21 +135,21 @@ data.frame(Observed=y.new,Predicted=predict(sgpv.2s.p,newdata=x.new))
 
 The prediction agrees with the truth well.  
 
-The selection process can be visualized below. `lambda.max` sets the limit of X-axis. Only effects whose lower bound doesn't reach the null regions are kept. Selected variables are labeled blue on the Y-axis.
+The selection process can be visualized below. `lambda.max` sets the limit of X-axis. Only effects whose lower bound doesn't reach the null regions are kept. Selected variables are labeled blue on the Y-axis. The vertical dotted line is the $\lambda$ selected by generalized information criterion (@fan2013tuning). 
 
 ```{r,eval=F}
-plot(sgpv.2s.p,lambda.max = 0.6)
+plot(sgpv.2s.p,lambda.max = 0.5)
 ```
 
-![](assets/glm.fig.2.png){width=80%}
+![](assets/glm.fig.1.png){width=80%}
 
 You can also chooses to view only one line per variable by setting `lpv` to be 1. That line is the 95\% confidence bound that is closer to the null.  
 
 ```{r,eval=F}
-plot(sgpv.2s.p,lambda.max = 0.6,lpv=1)
+plot(sgpv.2s.p,lambda.max = 0.5,lpv=1)
 ```
 
-![](assets/glm.fig.3.png){width=80%}
+![](assets/glm.fig.2.png){width=80%}
 
 # Cox regression
 
@@ -192,7 +171,7 @@ sgpv.2s.c <- pro.sgpv(x,y,stage=2,family="cox")
 sgpv.2s.c
 ```
 
-The two-stage algorithm successfully recovered the true support. We can also run a fast one-stage algorithm by setting`stage` to be 1.  
+The two-stage algorithm successfully recovered the true support. We can also run a fast one-stage algorithm by setting `stage` to be 1.  
 
 ```{r}
 sgpv.1s.c <- pro.sgpv(x,y,stage=1,family="cox")
@@ -210,6 +189,6 @@ plot(sgpv.1s.c)
 
 Effects estimates (in this case log hazards ratios) and corresponding 95\% confidence intervals are plotted for each variable in the full Cox model. Two vertical green bars indicate the null region. Only effects whose confidence bounds do not overlap with the null regions are kept. Selected variables are colored in blue.  
 
-![](assets/glm.fig.4.png){width=80%}
+![](assets/glm.fig.3.png){width=80%}
 
 # References

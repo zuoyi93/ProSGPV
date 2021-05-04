@@ -61,7 +61,6 @@ We can load the data and feed into `pro.sgpv` function. By default, a two-stage 
 x <- t.housing[, -ncol(t.housing)]
 y <- t.housing$V9
 
-set.seed(1)
 sgpv.2s <- pro.sgpv(x,y)
 sgpv.2s
 ```
@@ -84,10 +83,10 @@ In-sample prediction can be made using S3 method `predict` and an external sampl
 head(predict(sgpv.2s))
 ```
 
-The `ProSGPV` selection path can be extracted by use of S3 method `plot`. `lambda.max` argument controls the range of $\lambda$. The black vertical dotted line is where our selection is, i.e. at $\lambda_{\text{1se}}$. The null zone is the grey shaded region near 0. The blue labels on the Y-axis are the selected variables. 
+The `ProSGPV` selection path can be extracted by use of S3 method `plot`. `lambda.max` argument controls the range of $\lambda$. The black vertical dotted line is the $\lambda$ selected by generalized information criterion (@fan2013tuning). The null zone is the grey shaded region near 0. The blue labels on the Y-axis are the selected variables. 
 
 ```{r,eval=F}
-plot(sgpv.2s,lambda.max = 0.01)
+plot(sgpv.2s,lambda.max = 0.005)
 ```
 
 ![](assets/linear.fig.1.png){width=80%}
@@ -95,32 +94,10 @@ plot(sgpv.2s,lambda.max = 0.01)
 By default, three lines per variables are provided. You can also choose to view only one bound per variable by setting `lpv` argument to 1, where the one bound is the confidence bound that is closer to 0.
 
 ```{r, eval=F}
-plot(sgpv.2s, lambda.max=0.01, lpv=1)
+plot(sgpv.2s, lambda.max=0.005, lpv=1)
 ```
 
 ![](assets/linear.fig.2.png){width=80%}
-
-Because of variability in cross-validated lasso in the first stage of `ProSGPV`, the algorithm may produces slightly different models. Our recommendation is to run the algorithm several times and use the most frequent one. `which.spgv` function facilitates this process. By default, 100 repetitions are conducted. For the sake of compilation time, 20 repetitions is chosen. You will first see a density plot that presents the distribution of the model size over repetitions.
-
-```{r, fig.show="hide"}
-lots.sgpv <- which.sgpv(num.sim = 20, sgpv.2s)
-```
-
-![](assets/linear.fig.3.png){width=80%}
-
-
-```{r}
-lots.sgpv
-```
-
-There are four objects that `which.spgv` returns. `var.index` returns the indices of variables in the most frequent model; `var.label` returns labels of those variables; `random.seed` returns the random seed that would reproduce the most frequent model. We can check by  
-
-```{r}
-set.seed(1)
-pro.sgpv(x,y)
-```
-
-Lastly, `models` sorts all models that appear in the repetitions by frequency.  
 
 # One-stage algorithm
 
@@ -140,7 +117,7 @@ plot(sgpv.1s)
 ```
 
 
-![](assets/linear.fig.4.png){width=80%}
+![](assets/linear.fig.3.png){width=80%}
 
 # High dimensional case where $p>n$
 
@@ -166,7 +143,6 @@ true.beta <- data.linear[[4]]
 `ProSGPV` can identify the true support. 
 
 ```{r}
-set.seed(1)
 h.sgpv <- pro.sgpv(x,y)
 h.sgpv
 ```
@@ -174,10 +150,12 @@ h.sgpv
 Similar to the low-dimensional case, S3 methods `summary`, `coef`, `predict`, and `plot` are available. Below we show the selection path.  
 
 ```{r,eval=F}
+png("vignettes/assets/linear.fig.4.png", units="in", width=7, height=7, res=300)
 plot(h.sgpv)
+dev.off()
 ```
 
-![](assets/linear.fig.5.png){width=80%}
+![](assets/linear.fig.4.png){width=80%}
 
 
 # References

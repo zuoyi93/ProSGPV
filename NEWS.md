@@ -2,11 +2,13 @@
 
 Penalized Regression with Second-Generation P-Values
 
-## ProSGPV 0.1.0
+## ProSGPV 0.3.0
 
-1/6/2021: The first version of ProSGPV is released now!
+5/4/2021: ProSGPV is faster now!
 
-* Added a NEWS.md file to track changes to the package
+* Changed the first-stage screening method from cross-validated lasso to one using generalized information criterion
+
+* Removed `which.sgpv` as there is no variability in selection results given a data set
 
 ## ProSGPV 0.2.0
 
@@ -19,4 +21,10 @@ Penalized Regression with Second-Generation P-Values
 * Added the S3 `plot` method for the one-stage algorithm
 
 * Added vignettes to better illustrate how ProSGPV works
+
+## ProSGPV 0.1.0
+
+1/6/2021: The first version of ProSGPV is released now!
+
+* Added a NEWS.md file to track changes to the package
 

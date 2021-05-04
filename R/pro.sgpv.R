@@ -4,7 +4,7 @@
 #' from either one-stage algorithm or two-stage algorithm.
 #'
 #' @importFrom stats complete.cases coef lm predict
-#' @importFrom glmnet cv.glmnet
+#' @importFrom glmnet glmnet
 #' @param x Independent variables, can be a \code{matrix} or a \code{data.frame}
 #' @param y Dependent variable, can be a \code{vector} or a column from a \code{data.frame}
 #' @param stage Algorithm indicator. 1 denotes the one-stage algorithm and
@@ -18,7 +18,7 @@
 #' \describe{
 #' \item{var.index}{A vector of indices of selected variables}
 #' \item{var.label}{A vector of labels of selected variables}
-#' \item{lambda}{Cross-validated lambda in the two-stage algorithm. \code{NULL} for the one-stage algorithm}
+#' \item{lambda}{\code{lambda} selected by generalized information criterion in the two-stage algorithm. \code{NULL} for the one-stage algorithm}
 #' \item{x}{Input data \code{x}}
 #' \item{y}{Input data \code{y}}
 #' \item{family}{\code{family} from the input}
@@ -83,15 +83,9 @@ pro.sgpv <- function(x, y, stage = c(1, 2),
 
   # get candidate set
   if (stage == 2) {
-    if (family != "cox") {
-      lasso.cv <- cv.glmnet(xs, ys, family = family)
-      lambda <- lasso.cv$lambda.1se
-      candidate.index <- which(coef(lasso.cv, s = lambda)[-1] != 0)
-    } else {
-      lasso.cv <- cv.glmnet(xs, Surv(ys[, 1], ys[, 2]), family = "cox")
-      lambda <- lasso.cv$lambda.1se
-      candidate.index <- which(as.numeric(coef(lasso.cv, s = lambda)) != 0)
-    }
+    temp0 <- get.candidate(xs, ys, family)
+    candidate.index <- temp0[[1]]
+    lambda <- temp0[[2]]
   } else {
     candidate.index <- 1:ncol(xs)
     lambda <- NULL
@@ -528,7 +522,7 @@ plot.sgpv <- function(x, lpv = 3, lambda.max = NULL, short.label = T, ...) {
     # create a data set for the null bound
     n.bound <- results[(3 * p + 1), ]
 
-    # find the lambda.1se
+    # find the lambda.gic
     vlambda <- x$lambda
 
     # plot the results
@@ -545,7 +539,7 @@ plot.sgpv <- function(x, lpv = 3, lambda.max = NULL, short.label = T, ...) {
       axis(1, at = round(seq(0, lambda.max, length.out = 5), 3))
       axis(2, at = ytick, labels = c(ytick[1:2], 0, ytick[4:5]))
       mtext(var.axis, side = 2, at = location.beta, col = color.use)
-      mtext(bquote(lambda["1se"]), side = 1, at = vlambda)
+      mtext(bquote(lambda["gic"]), side = 1, at = vlambda)
       # null region
       if (p < length(x$y)) {
         polygon(c(lambda.seq, rev(lambda.seq)), c(-n.bound, rev(n.bound)), col = "grey", border = "grey")
@@ -574,7 +568,7 @@ plot.sgpv <- function(x, lpv = 3, lambda.max = NULL, short.label = T, ...) {
 
       # text on axis
       mtext(var.axis, side = 2, at = location.beta, col = color.use)
-      mtext(bquote(lambda["1se"]), side = 1, at = vlambda)
+      mtext(bquote(lambda["gic"]), side = 1, at = vlambda)
 
       # point estimates
       xvals <- split(plot.d$lambda, plot.d$v)

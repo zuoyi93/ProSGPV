@@ -37,9 +37,9 @@ devtools::install_github("zuoyi93/ProSGPV")
 
 ## 3.1 How ProSGPV works
 
-Below is an illustration of how ProSGPV successfully selects the true support, while lasso and fully relaxed lasso fails. Five variables are simulated and only V3 is associated with the response. Plot (1) presents the lasso solution path. The vertical dotted line is <img src="https://latex.codecogs.com/png.latex?\color{blue}{\lambda_{\text{1se}}}" /> . (2) shows the fully relaxed lasso path. (3) shows the fully relaxed lasso paths with their 95% confidence intervals (in lighter color). (4) illustrates the two-stage ProSGPV algorithm selection path. The shaded area is the null region; the colored lines are each 95% confidence bound that is closer to the null region. Lasso and fully relaxed lasso would select both V2 and V3, while ProSGPV successfully screens out V2.  
+Below is an illustration of how ProSGPV successfully selects the true support, while lasso and fully relaxed lasso fails. Five variables are simulated and only V3 is associated with the response. Plot (1) presents the lasso solution path. The vertical dotted line is the lambda selected by generalized information criterion. (2) shows the fully relaxed lasso path. (3) shows the fully relaxed lasso paths with their 95% confidence intervals (in lighter color). (4) illustrates the ProSGPV algorithm selection path. The shaded area is the null region; the colored lines are each 95% confidence bound that is closer to the null region. Lasso and fully relaxed lasso would select both V5 and V3, while ProSGPV successfully screens out V2.  
 
-![](man/figures/fig.4.png)
+![](vignettes/assets/works.png)
 
 ## 3.2 Real-world data
 
@@ -58,8 +58,6 @@ library(ProSGPV)
 # prepare the data
 x = t.housing[,-ncol(t.housing)]
 y = t.housing$V9
-
-set.seed(1)
 
 # run ProSGPV
 out.sgpv.2 <- pro.sgpv(x = x, y = y)
@@ -125,47 +123,7 @@ head(predict(out.sgpv.2s))
 	#> 1565.7505 3573.7793  741.7576  212.1297 5966.1682 5724.0172
 
 
-Because of variability in cross-validated lasso in the first stage of `ProSGPV`, the algorithm may produces slightly different models. Our recommendation is to run the algorithm several times and use the most frequent one. `which.spgv` function facilitates this process. By default, 100 repetitions are conducted. You will first see a density plot that presents the distribution of the model size over repetitions. 
-
-```r
-lots.sgpv <- which.sgpv(num.sim = 20, out.sgpv.2s)
-```
-
-![](vignettes/assets/linear.fig.3.png)
-
-We can also print `lots.sgpv`.  
-
-```r
-lots.sgpv
-```
-	#> $var.index
-	#> [1]  7  9 10 12 14 23
-	#> 
-	#> $var.label
-	#> [1] "V8"  "V12" "V13" "V15" "V17" "V26"
-	#> 
-	#> $random.seed
-	#> [1] 1
-	#> 
-	#> $models
-	#> 
-	#>   c(7, 9, 10, 12, 14, 23) c(4, 6, 7, 8, 14, 24, 26)     c(4, 6, 7, 8, 14, 26) 
-	#>                        10                         3                         2 
-	#>    c(6, 7, 8, 13, 16, 25)   c(7, 8, 10, 12, 14, 23)    c(6, 7, 8, 10, 14, 23) 
-	#>                         2                         2                         1
-
-There are four objects that `which.spgv` returns. `var.index` returns the indices of variables in the most frequent model; `var.label` returns labels of those variables; `random.seed` returns the random seed that would reproduce the most frequent model. We can check by
-
-```r
-set.seed(1)
-pro.sgpv(x,y)
-```
-
-	#> Selected variables are V8 V12 V13 V15 V17 V26
-
-Lastly, `models` sorts all models that appear in the repetitions by frequency.
-
-Once we are certain about the final model, S3 method `plot` can be used to visualize the variable selection process.
+S3 method `plot` can be used to visualize the variable selection process.
 
 ``` r
 plot(out.sgpv.2, lambda.max = 0.01)
@@ -208,7 +166,7 @@ Moreover, `plot` function can be used to visualize the variable selection proces
 plot(out.sgpv.1)
 ```
 
-![](vignettes/assets/linear.fig.4.png)
+![](vignettes/assets/linear.fig.3.png)
 
 However, it is recommended to use the two-stage algorithm rather than the one-stage algorithm for better support recovery and parameter estimation. More importantly, only the two-stage algorithm is available for high dimensional data where <img src="https://latex.codecogs.com/png.latex?\color{blue}{p>n}" />.
 
@@ -233,4 +191,8 @@ The papers regarding the second-generation p-values:
 	Blume JD, Greevy RA, Welty VF, Smith JR, Dupont WD. An introduction to second-generation p-values. The American Statistician. 2019 Mar 29;73(sup1):157-67.
 
 	Blume JD, D’Agostino McGowan L, Dupont WD, Greevy Jr RA. Second-generation p-values: Improved rigor, reproducibility, & transparency in statistical analyses. PLoS One. 2018 Mar 22;13(3):e0188299.
+
+The paper on finding tuning parameters with generalized information criterion:
+
+	Fan Y, Tang CY. Tuning parameter selection in high dimensional penalized likelihood. Journal of the Royal Statistical Society: SERIES B: Statistical Methodology. 2013 Jun 1:531-52.
 

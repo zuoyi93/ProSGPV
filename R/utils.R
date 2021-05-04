@@ -1,3 +1,84 @@
+#' \code{get.candidate}: Get candidate set
+#'
+#' Get the indices of the candidate set in the first stage
+#'
+#' @importFrom stats lm glm
+#' @importFrom glmnet glmnet
+#' @importFrom survival Surv coxph
+#' @importFrom stats binomial deviance poisson
+#' @param xs Standardized independent variables
+#' @param ys Standardized dependent variable
+#' @param family A description of the error distribution and link function to be
+#'  used in the model. It can take the value of `\code{gaussian}`, `\code{binomial}`,
+#'  `\code{poisson}`, and `\code{cox}`.
+#'
+#' @return A list of following components:
+#' \describe{
+#' \item{candidate.index}{A vector of indices of selected variables in the candidate set}
+#' \item{lambda}{The \code{lambda} selected by generalized information criterion}
+#' }
+
+get.candidate <- function(xs, ys, family){
+
+  n <- nrow(xs)
+
+  if(family == "gaussian"){
+
+    # lasso
+    lasso <- glmnet(xs,ys)
+    yhat.m <- predict(lasso,newx=xs)
+    p.k <- lasso$df + 2
+
+    lasso.lambda.index <- which.min(sapply(1:ncol(yhat.m),function(z)
+      n*log(sum((ys-yhat.m[,z] )^2)) + p.k[z] * log(log(n))*log(p.k[z]) ) )
+    lambda <- lasso$lambda[lasso.lambda.index]
+    candidate.index <- which(coef(lasso, s = lambda)[-1] != 0)
+
+
+  }else if (family == "binomial"){
+
+    lasso.log <- glmnet(xs,ys,family = "binomial")
+
+    yhat.m <- predict(lasso.log,newx=xs,type="response")
+    p.k <- lasso.log$df + 1
+
+    lasso.lambda.index <- which.min(sapply(1:ncol(yhat.m),function(z)
+      binomial()$aic(ys, rep(1,n), yhat.m[,z], rep(1,n)) +
+        p.k[z] * log(log(n))*log(p.k[z]) ) )
+    lambda <- lasso.log$lambda[lasso.lambda.index]
+    candidate.index <- which(coef(lasso.log,s = lambda)[-1] != 0)
+
+  }else if (family == "poisson"){
+
+    lasso.poisson <- glmnet(xs,ys,family = "poisson")
+
+    yhat.m <- predict(lasso.poisson,newx=xs,type="response")
+    p.k <- lasso.poisson$df + 1
+
+    lasso.lambda.index <- which.min(sapply(1:ncol(yhat.m),function(z)
+      poisson()$aic(ys, rep(1,n), yhat.m[,z], rep(1,n)) +
+        p.k[z] * log(log(n))*log(p.k[z]) ) )
+    lambda <- lasso.poisson$lambda[lasso.lambda.index]
+    candidate.index <- which(
+      coef(lasso.poisson, s = lambda)[-1] != 0)
+
+  }else if (family == "cox"){
+
+    lasso.cox <- glmnet(xs,Surv(ys[,1], ys[,2]),family = "cox")
+    p.k <- lasso.cox$df
+
+    lasso.lambda.index <- which.min(sapply(1:length(p.k),function(z)
+      -(lasso.cox$nulldev - deviance(lasso.cox))[z] +
+        p.k[z] * log(log(n))*log(p.k[z]) ) )
+    lambda <- lasso.cox$lambda[lasso.lambda.index]
+    candidate.index <- which(as.numeric(coef(lasso.cox, s = lambda)) != 0)
+
+  }
+
+  return(list(candidate.index, lambda))
+}
+
+
 #' \code{get.var}: Get indices
 #'
 #' Get the indices of the variables selected by the algorithm
@@ -331,112 +412,4 @@ gen.sim.data <- function(n = 100, p = 50, s = 10,
   }
 
   return(list(X, Y, index, beta))
-}
-
-#' \code{one.time.size}: utility function for \code{which.sgpv} function
-#'
-#' Return the selected model as well as the model size in each iteration
-#'
-#' @param x Input X
-#' @param y Input Y
-#' @param family A description of the error distribution and link function to be
-#'  used in the model. It can take the value of `\code{gaussian}`, `\code{binomial}`,
-#'  `\code{poisson}`, and `\code{cox}`. Default is `\code{gaussian}`
-#'
-#' @return A list of following components:
-#' \describe{
-#' \item{model}{The indices of selected variables}
-#' \item{size}{The size of the model}
-#' }
-
-one.time.size <- function(x, y, family) {
-  out <- pro.sgpv(x, y, family = family)
-
-  return(list(out$var.index, length(out$var.index)))
-}
-
-#' which.sgpv: Find the most frequent model selected by the two-stage ProSGPV
-#'
-#' Return the selected variables in the most frequent model selected by ProSGPV,
-#' the random seed to produce the result, and a density plot of model size. Examples
-#' can be found at https://github.com/zuoyi93/ProSGPV/tree/master/vignettes.
-#'
-#' @importFrom stats density
-#'
-#' @param object An \code{sgpv} object
-#' @param num.sim Number of repetitions. Default is 1000
-#'
-#' @return A list of following components:
-#' \describe{
-#' \item{var.index}{The indices of selected variables in the most frequent model}
-#' \item{var.label}{Labels of selected variables in the most frequent model}
-#' \item{random.seed}{A random seed to reproduce the selection result}
-#' \item{models}{A list of unqiue models sorted by frequency}
-#' }
-#' @export
-
-which.sgpv <- function(object, num.sim = 100) {
-  if (class(object) != "sgpv") stop("`object` has to be of class `sgpv`.")
-
-  if (object$stage == 1) {
-    if (length(object$var.label) > 0) {
-      cat("The one-stage algorithm always selects", object$var.label, "\n")
-    } else {
-      cat("The one-stage algorithm always selects none of the variables.\n")
-    }
-
-    return(list(
-      var.index = object$var.index,
-      var.label = object$var.label,
-      random.seed = 1,
-      models = object$var.index
-    ))
-  } else { # two-stage algorithm
-
-    temp <- replicate(num.sim, one.time.size(object$x, object$y, object$family))
-
-    # the most frequent model
-    out.1 <- names(sort(table(paste(temp[1, ])), decreasing = T)[1])
-    if (!grepl(":", out.1, fixed = T)) {
-      out.1 <- unlist(regmatches(out.1, gregexpr("\\(?[0-9,.]+", out.1)))
-      out.1 <- as.numeric(gsub("\\(", "", gsub(",", "", out.1)))
-    } else {
-      out.1 <- as.numeric(unlist(regmatches(out.1, gregexpr("\\(?[0-9,.]+", out.1))))
-      out.1 <- seq(out.1[1], out.1[2], 1)
-    }
-
-    # find the random seed to reproduce the result
-    i <- 1
-    while (T) {
-      set.seed(i)
-      if( 0 %in% out.1 ){
-        if( (length(pro.sgpv(object$x, object$y,
-                    family = object$family)$var.index) == 0) & (out.1 == 0) ) break
-      }else{
-        if (setequal(
-          pro.sgpv(object$x, object$y, family = object$family)$var.index,
-          out.1
-        )) {
-          break
-        }
-      }
-
-      i <- i + 1
-    }
-
-    # make a histogram
-
-    plot(density(unlist(temp[2, ])),
-      main = "Density of model size",
-      xlab = "Model size"
-    )
-    polygon(density(unlist(temp[2, ])), col = "red", border = "blue")
-
-    return(list(
-      var.index = out.1,
-      var.label = colnames(object$x)[out.1],
-      random.seed = i,
-      models = sort(table(paste(temp[1, ])), decreasing = T)
-    ))
-  }
 }
