@@ -173,7 +173,7 @@ However, it is recommended to use the two-stage algorithm rather than the one-st
 
 ## 3.3 More examples
 
-For [high-dimensional continuous data examples](vignettes/linear-vignette.Rmd) and [GLM and Cox examples](vignettes/glm-cox-vignette.Rmd), please refer to the [vignette](vignettes) folder.  
+For [high-dimensional continuous data examples](https://zuoyi93.github.io/PDF/Vignette%20ProSGPV%20Linear.html) and [GLM and Cox examples](https://zuoyi93.github.io/PDF/Vignette%20ProSGPV%20GLM%20and%20Cox.html), please refer to the [vignette](vignettes) folder.  
 
 
 # 4. References
