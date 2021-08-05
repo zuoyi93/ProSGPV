@@ -8,7 +8,8 @@ pro.sgpv(
   x,
   y,
   stage = c(1, 2),
-  family = c("gaussian", "binomial", "poisson", "cox")
+  family = c("gaussian", "binomial", "poisson", "cox"),
+  gvif = F
 )
 }
 \arguments{
@@ -23,6 +24,10 @@ only the two-stage algorithm is available.}
 \item{family}{A description of the error distribution and link function to be
 used in the model. It can take the value of \verb{\code{gaussian}}, \verb{\code{binomial}},
 \verb{\code{poisson}}, and \verb{\code{cox}}. Default is \verb{\code{gaussian}}}
+
+\item{gvif}{A logical operator indicating whether a generalized variance inflation factor-adjusted
+null bound is used. Default is FALSE. See Fox (1992) \url{doi:10.2307/2290467}
+for more details on how to calculate GVIF}
 }
 \value{
 A list of following components:

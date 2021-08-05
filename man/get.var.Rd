@@ -4,7 +4,7 @@
 \alias{get.var}
 \title{\code{get.var}: Get indices}
 \usage{
-get.var(candidate.index, xs, ys, family)
+get.var(candidate.index, xs, ys, family, gvif)
 }
 \arguments{
 \item{candidate.index}{Indices of the candidate set}
@@ -16,6 +16,9 @@ get.var(candidate.index, xs, ys, family)
 \item{family}{A description of the error distribution and link function to be
 used in the model. It can take the value of \verb{\code{gaussian}}, \verb{\code{binomial}},
 \verb{\code{poisson}}, and \verb{\code{cox}}.}
+
+\item{gvif}{A logical operator indicating whether a generalized variance inflation factor-adjusted
+null bound is used. Default is FALSE.}
 }
 \value{
 A list of following components:

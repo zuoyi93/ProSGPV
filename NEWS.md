@@ -2,6 +2,13 @@
 
 Penalized Regression with Second-Generation P-Values
 
+
+## ProSGPV 1.0.0
+
+8/6/2021: ProSGPV version 1.0.0 is here!
+
+* Added the reference that proposed the ProSGPV algorithm
+
 ## ProSGPV 0.3.0
 
 5/4/2021: ProSGPV is faster now!

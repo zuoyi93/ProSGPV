@@ -180,7 +180,7 @@ For [high-dimensional continuous data examples](https://zuoyi93.github.io/PDF/Vi
 
 The paper that proposed ProSGPV algorithm in linear regression:  
 
-	Zuo Y, Stewart TG, Blume JD. Variable Selection with Second-Generation P-Values. arXiv preprint arXiv:2012.07941. 2020 Dec 15.
+	Yi Zuo, Thomas G. Stewart & Jeffrey D. Blume (2021) Variable Selection With Second-Generation P-Values, The American Statistician, DOI: 10.1080/00031305.2021.1946150
 
 The paper that proposed ProSGPV algorithm in GLM and Cox models:
 

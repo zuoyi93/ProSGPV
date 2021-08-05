@@ -13,6 +13,9 @@
 #' @param family A description of the error distribution and link function to be
 #'  used in the model. It can take the value of `\code{gaussian}`, `\code{binomial}`,
 #'  `\code{poisson}`, and `\code{cox}`. Default is `\code{gaussian}`
+#' @param gvif A logical operator indicating whether a generalized variance inflation factor-adjusted
+#' null bound is used. Default is FALSE. See Fox (1992) <doi:10.2307/2290467>
+#' for more details on how to calculate GVIF
 #'
 #' @return A list of following components:
 #' \describe{
@@ -46,7 +49,8 @@
 #'
 #' # More examples at https://github.com/zuoyi93/ProSGPV/tree/master/vignettes
 pro.sgpv <- function(x, y, stage = c(1, 2),
-                     family = c("gaussian", "binomial", "poisson", "cox")) {
+                     family = c("gaussian", "binomial", "poisson", "cox"),
+                     gvif = F) {
   if (!is.numeric(as.matrix(x)) | !is.numeric(y)) stop("The input data have non-numeric values.")
 
   if (any(complete.cases(x) == F) | any(complete.cases(y) == F)) {
@@ -91,7 +95,7 @@ pro.sgpv <- function(x, y, stage = c(1, 2),
     lambda <- NULL
   }
 
-  temp <- get.var(candidate.index, xs, ys, family)
+  temp <- get.var(candidate.index, xs, ys, family, gvif)
   out.sgpv <- temp[[1]]
   null.bound <- temp[[2]]
   pe.can <- temp[[3]]
@@ -300,16 +304,16 @@ predict.sgpv <- function(object, newdata, type, ...) {
 
     if (object$family == "gaussian") {
       lm.m <- lm(Response ~ ., data = data.d)
-      predict(lm.m, data.frame(newdata))
+      predict(lm.m, data.frame(newdata), ...)
     } else if (object$family == "poisson") {
       glm.m <- glm(Response ~ ., family = "poisson", data = data.d)
-      predict(glm.m, data.frame(newdata), type = type)
+      predict(glm.m, data.frame(newdata), type = type, ...)
     } else {
       glm.m <- glm(Response ~ .,
         family = "binomial", data = data.d,
         method = "brglmFit", type = "MPL_Jeffreys"
       )
-      predict(glm.m, data.frame(newdata), type = type)
+      predict(glm.m, data.frame(newdata), type = type, ...)
     }
   } else {
     message("None of variables are selected.")
@@ -320,7 +324,7 @@ predict.sgpv <- function(object, newdata, type, ...) {
     if (object$family == "gaussian") {
       data.d <- data.frame(yy = object$y)
       lm.m <- lm(yy ~ 1, data = data.d)
-      predict(lm.m, data.frame(newdata))
+      predict(lm.m, data.frame(newdata), ...)
     } else {
       glm.m <- glm(yy ~ 1,
         data = data.frame(
@@ -330,7 +334,7 @@ predict.sgpv <- function(object, newdata, type, ...) {
         family = object$family
       )
 
-      predict(glm.m, newdata = data.frame(newdata), type = "response")
+      predict(glm.m, newdata = data.frame(newdata), type = "response", ...)
     }
   }
 }
@@ -534,7 +538,7 @@ plot.sgpv <- function(x, lpv = 3, lambda.max = NULL, short.label = T, ...) {
         type = "n", ylim = ylim, xlim = c(0, lambda.max),
         xlab = expression(lambda), ylab = "Bound that is closer to the null",
         main = "Solution to the two-stage algorithm with one line per variable",
-        axes = F, frame.plot = T
+        axes = F, frame.plot = T, ...
       )
       axis(1, at = round(seq(0, lambda.max, length.out = 5), 3))
       axis(2, at = ytick, labels = c(ytick[1:2], 0, ytick[4:5]))
@@ -554,7 +558,7 @@ plot.sgpv <- function(x, lpv = 3, lambda.max = NULL, short.label = T, ...) {
         type = "n", ylim = ylim, xlim = c(0, lambda.max),
         xlab = expression(lambda), ylab = "Point estimates and confidence intervals",
         main = "Solution to the two-stage algorithm with three lines per variable",
-        axes = F, frame.plot = T
+        axes = F, frame.plot = T, ...
       )
       axis(1, at = round(seq(0, lambda.max, length.out = 5), 3))
       axis(2, at = ytick, labels = c(ytick[1:2], 0, ytick[4:5]))
@@ -608,7 +612,7 @@ plot.sgpv <- function(x, lpv = 3, lambda.max = NULL, short.label = T, ...) {
       type = "n", xlab = "Effect estimates", ylab = "Variables", yaxt = "n",
       xlim = c(x.lower, x.upper),
       ylim = c(0, p + 1),
-      main = "Selection results in the one-stage algorithm"
+      main = "Selection results in the one-stage algorithm", ...
     )
     mtext(paste("ProSGPV selects", length(x$var.index), "variables."), side = 3)
     lines(x = rep(null.bound, 2), y = c(0, p + 1), col = "green4")

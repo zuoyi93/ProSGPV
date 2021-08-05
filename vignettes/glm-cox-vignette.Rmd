@@ -191,4 +191,8 @@ Effects estimates (in this case log hazards ratios) and corresponding 95\% confi
 
 ![](assets/glm.fig.3.png){width=80%}
 
+# Way to address high correlation or dense signals
+
+When the design matrix has high within correlation, or signals are known to be dense in the data, the ProSGPV algorithm yields a null bound that is slightly higher than the noise level, which subsequently affects the support recovery performance by missing some small true effects. One way to address this issue is to replace the constant null bound in the ProSGPV with a generalized variance inflation factor (GVIF)-adjusted null bound. Please see @fox1992generalized for more details on how to calculate the GVIF for each variable in the design matrix. Essentially, we deflate the coefficient estimate standard error of each variable by its GVIF, and thus produce a smaller null bound, which includes more variables in the final selection set. This adjustment is found to be helpful when signals are dense, too.  
+
 # References

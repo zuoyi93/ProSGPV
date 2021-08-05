@@ -92,6 +92,8 @@ get.candidate <- function(xs, ys, family){
 #' @param family A description of the error distribution and link function to be
 #'  used in the model. It can take the value of `\code{gaussian}`, `\code{binomial}`,
 #'  `\code{poisson}`, and `\code{cox}`.
+#' @param gvif A logical operator indicating whether a generalized variance inflation factor-adjusted
+#' null bound is used. Default is FALSE.
 #'
 #' @return A list of following components:
 #' \describe{
@@ -102,8 +104,11 @@ get.candidate <- function(xs, ys, family){
 #' \item{ub}{Upper bounds of effect estimates in the candidate set}
 #' }
 
-get.var <- function(candidate.index, xs, ys, family) {
-  if (length(candidate.index) == 0) {
+get.var <- function(candidate.index, xs, ys, family, gvif) {
+
+  pp <- length(candidate.index)
+
+  if ( pp == 0) {
     out.sgpv <- integer(0)
     null.bound.p <- NULL
     pe <- NULL
@@ -112,43 +117,55 @@ get.var <- function(candidate.index, xs, ys, family) {
     ub <- NULL
   } else {
     if (family == "gaussian") {
-      f.l <- lm(ys ~ xs[, candidate.index])
-      pe <- summary(f.l)$coef[-1, 1]
-      se <- summary(f.l)$coef[-1, 2]
+
+      mod <- lm(ys ~ xs[, candidate.index])
+      pe <- summary(mod)$coef[-1, 1]
+      se <- summary(mod)$coef[-1, 2]
+
     } else if (family == "binomial") {
-      glm.m <- glm(ys ~ xs[, candidate.index],
-        family = family, method = "brglmFit", type = "MPL_Jeffreys"
+
+      mod <- glm(ys ~ xs[, candidate.index],
+                   family = family, method = "brglmFit", type = "MPL_Jeffreys"
       )
-      pe <- coef(glm.m)[-1]
-      se <- summary(glm.m)$coef[-1, 2]
+      pe <- coef(mod)[-1]
+      se <- summary(mod)$coef[-1, 2]
+
     } else if (family == "poisson") {
-      glm.m <- glm(ys ~ xs[, candidate.index], family = family)
-      pe <- coef(glm.m)[-1]
-      se <- summary(glm.m)$coef[-1, 2]
+
+      mod <- glm(ys ~ xs[, candidate.index], family = family)
+      pe <- coef(mod)[-1]
+      se <- summary(mod)$coef[-1, 2]
+
     } else {
-      cox.m <- coxph(Surv(ys[, 1], ys[, 2]) ~ xs[, candidate.index])
-      pe <- coef(cox.m)
-      se <- summary(cox.m)$coef[, 3]
+
+      mod <- coxph(Surv(ys[, 1], ys[, 2]) ~ xs[, candidate.index])
+      pe <- coef(mod)
+      se <- summary(mod)$coef[, 3]
+
     }
 
-    if(length(pe) == length(se)){
-      null.bound.p <- mean(se)
-
-      # screen variables
-      out.sgpv <- candidate.index[which(abs(pe) > 1.96 * se + null.bound.p)]
-    }else{
-
+    if(length(pe) != length(se)){
       name.drop <- setdiff(names(pe), names(se))
       pe <- pe[!names(pe) %in% name.drop]
       se <- se[!names(se) %in% name.drop]
       candidate.index <- candidate.index[!is.na(pe)]
-
-      null.bound.p <- mean(se)
-
-      # screen variables
-      out.sgpv <- candidate.index[which(abs(pe) > 1.96 * se + null.bound.p)]
-
     }
+
+    if(gvif){
+
+      if(pp > 1){
+        gvif.m <- gvif(mod, family = family)
+      }else{
+        gvif.m <- 1
+      }
+
+      null.bound.p <- as.numeric(se %*% (1/gvif.m) /pp)
+    }else{
+      null.bound.p <- mean(se)
+    }
+
+    # screen variables
+    out.sgpv <- candidate.index[which(abs(pe) > 1.96 * se + null.bound.p)]
 
   }
 
@@ -413,3 +430,53 @@ gen.sim.data <- function(n = 100, p = 50, s = 10,
 
   return(list(X, Y, index, beta))
 }
+
+#' \code{gvif}: Get GVIF for each variable
+#'
+#' Get generalized variance inflation factor (GVIF) for each variable.
+#' See Fox (1992) <doi:10.2307/2290467> for more details on how to calculate GVIF.
+#'
+#' @importFrom stats cov2cor vcov
+#' @param mod A model object with at least two explanatory variables
+#' @param family A description of the error distribution and link function to be
+#'  used in the model. It can take the value of `\code{gaussian}`, `\code{binomial}`,
+#'  `\code{poisson}`, and `\code{cox}`.
+#'
+#' @return A vector of GVIF for each variable in the model
+
+gvif <- function(mod, family){
+
+  if(family != "cox"){
+    v <- vcov(mod)[-1,-1]
+    R <- cov2cor(v)
+  }else{
+    v <- vcov(mod)
+    R <- cov2cor(v)
+  }
+
+  na.ind <- anyNA(R)
+
+  if(na.ind){
+    na.index <- as.numeric(which(rowSums(is.na(R)) > 1))
+    R[is.na(R)] <- 0
+  }
+
+  detR <- det(R)
+  n.terms <- length(coef(mod)) - 1
+  result <- numeric(n.terms)
+
+  for (term in 1:n.terms) {
+    result[term] <- det(as.matrix(R[term, term])) *
+      det(as.matrix(R[-term, -term])) / detR
+  }
+
+
+
+  if(na.ind){
+    result[-na.index]
+  }else{
+    result
+  }
+
+}
+

@@ -1,6 +1,7 @@
 Package: ProSGPV
 Title: Penalized Regression with Second-Generation P-Values
-Version: 0.3.0
+Version: 1.0.0
+Date: 2021-08-06
 Authors@R: 
     c(person(given = "Yi",
            family = "Zuo",
@@ -14,15 +15,13 @@ Authors@R:
       )
 Maintainer: Yi Zuo <yi.zuo@vanderbilt.edu>
 Description: Implementation of penalized regression with second-generation p-values for variable
-    selection. The algorithm can handle linear regression, GLM, and Cox regression. S3 methods print(),
-    summary(), coef(), predict(), and plot() are available for the algorithm. Technical details
-    can be found at <arXiv:2012.07941>. 
+    selection. The algorithm can handle linear regression, GLM, and Cox regression. S3 methods print(), summary(), coef(), predict(), and plot() are available for the algorithm. Technical details
+    can be found at Zuo et al. (2021) <doi:10.1080/00031305.2021.1946150>. 
 Depends: R (>= 3.5.0), glmnet, brglm2
 Imports: MASS, survival
 License: GPL-3
 Encoding: UTF-8
-URL: https://github.com/zuoyi93/ProSGPV,
-     https://arxiv.org/abs/2012.07941
+URL: https://github.com/zuoyi93/ProSGPV
 BugReports: https://github.com/zuoyi93/ProSGPV/issues
 LazyData: true
 Roxygen: list(markdown = TRUE)
