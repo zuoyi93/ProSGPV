@@ -14,7 +14,7 @@
 #'  used in the model. It can take the value of `\code{gaussian}`, `\code{binomial}`,
 #'  `\code{poisson}`, and `\code{cox}`. Default is `\code{gaussian}`
 #' @param gvif A logical operator indicating whether a generalized variance inflation factor-adjusted
-#' null bound is used. Default is FALSE. See Fox (1992) <doi:10.2307/2290467>
+#' null bound is used. Default is FALSE. See Fox (1992) <doi:10.1080/01621459.1992.10475190>
 #' for more details on how to calculate GVIF
 #'
 #' @return A list of following components:

@@ -434,7 +434,7 @@ gen.sim.data <- function(n = 100, p = 50, s = 10,
 #' \code{gvif}: Get GVIF for each variable
 #'
 #' Get generalized variance inflation factor (GVIF) for each variable.
-#' See Fox (1992) <doi:10.2307/2290467> for more details on how to calculate GVIF.
+#' See Fox (1992) <doi:10.1080/01621459.1992.10475190> for more details on how to calculate GVIF.
 #'
 #' @importFrom stats cov2cor vcov
 #' @param mod A model object with at least two explanatory variables
