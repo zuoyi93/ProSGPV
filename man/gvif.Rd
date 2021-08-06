@@ -18,5 +18,5 @@ A vector of GVIF for each variable in the model
 }
 \description{
 Get generalized variance inflation factor (GVIF) for each variable.
-See Fox (1992) \url{doi:10.1080/01621459.1992.10475190} for more details on how to calculate GVIF.
+See Fox (1992) \doi{10.1080/01621459.1992.10475190} for more details on how to calculate GVIF.
 }

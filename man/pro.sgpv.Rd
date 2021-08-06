@@ -26,7 +26,7 @@ used in the model. It can take the value of \verb{\code{gaussian}}, \verb{\code{
 \verb{\code{poisson}}, and \verb{\code{cox}}. Default is \verb{\code{gaussian}}}
 
 \item{gvif}{A logical operator indicating whether a generalized variance inflation factor-adjusted
-null bound is used. Default is FALSE. See Fox (1992) \url{doi:10.1080/01621459.1992.10475190}
+null bound is used. Default is FALSE. See Fox (1992) \doi{10.1080/01621459.1992.10475190}
 for more details on how to calculate GVIF}
 }
 \value{
