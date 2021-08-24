@@ -21,7 +21,7 @@ knitr::opts_chunk$set(
 
 # Introduction
 
-`ProSGPV` is a package that performs variable selection with Second-Generation P-Values (SGPV). This document illustrates how `ProSGPV` performs variable selection with data from generalized linear models (GLM) and Cox proportional hazards models. Technical details about this algorithm can be found at @zuo2020variable. 
+`ProSGPV` is a package that performs variable selection with Second-Generation P-Values (SGPV). This document illustrates how `ProSGPV` performs variable selection with data from generalized linear models (GLM) and Cox proportional hazards models. Technical details about this algorithm can be found at @zuo2021variable. 
 
 We will use Logistic regression to illustrate how `ProSGPV` selects variables with a low-dimensional ($n>p$) real-world data example and how to choose models when each run gives you slightly different results. We will use Poisson regression to show how `ProSGPV` works with simulated high-dimensional Poisson data and a visualization tool for the selection process. We will use Cox proportional hazards model to show how a fast one-stage algorithm works with simulated data together with a visualization tool for the one-stage `ProSGPV`.     
 

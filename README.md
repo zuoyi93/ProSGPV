@@ -173,14 +173,14 @@ However, it is recommended to use the two-stage algorithm rather than the one-st
 
 ## 3.3 More examples
 
-For [high-dimensional continuous data examples](https://zuoyi93.github.io/PDF/Vignette%20ProSGPV%20Linear.html) and [GLM and Cox examples](https://zuoyi93.github.io/PDF/Vignette%20ProSGPV%20GLM%20and%20Cox.html), please refer to the [vignette](vignettes) folder.  
+For [high-dimensional continuous data examples](https://zuoyi93.github.io/PDF/Vignette-ProSGPV-Linear.html) and [GLM and Cox examples](https://zuoyi93.github.io/PDF/Vignette-ProSGPV-Nonlinear.html), please refer to the [vignette](vignettes) folder.  
 
 
 # 4. References
 
 The paper that proposed ProSGPV algorithm in linear regression:  
 
-	Yi Zuo, Thomas G. Stewart & Jeffrey D. Blume (2021) Variable Selection With Second-Generation P-Values, The American Statistician, DOI: 10.1080/00031305.2021.1946150
+	Zuo Y, Stewart TG, Blume JD. Variable Selection with Second-Generation P-Values. The American Statistician. 2021 Jul 23:1-1.
 
 The paper that proposed ProSGPV algorithm in GLM and Cox models:
 
